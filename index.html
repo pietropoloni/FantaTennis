@@ -12,13 +12,14 @@
     :root{
       --bg:#0b1020; --card:#111834; --text:#e5e7eb; --muted:#9aa4b2;
       --a:#ef4444; --b:#3b82f6; --c:#10b981; --d:#f59e0b;
-      --ok:#22c55e; --ring:#334155;
+      --ok:#22c55e; --ring:#334155; --accent:#7dd3fc;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0a0f1f 0%, #0f1731 100%);color:var(--text)}
     header{position:sticky;top:0;background:rgba(11,16,32,0.8);backdrop-filter:blur(10px);border-bottom:1px solid #1f2a44;z-index:5}
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
     h1{margin:4px 0 6px;font-size:1.5rem;letter-spacing:.2px}
+    h2{margin:18px 0 8px}
     .sub{color:var(--muted);font-size:.9rem}
     .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
     button{
@@ -27,10 +28,15 @@
     }
     button:hover{transform:translateY(-1px);background:#1f2a55}
     button:disabled{opacity:.55;cursor:not-allowed}
-    select{padding:6px 10px;border-radius:8px;background:#1b2344;color:#e5e7eb;border:1px solid #2a3665}
+    select, input[type="text"], input[type="number"], input[type="date"], textarea{
+      padding:8px 10px;border-radius:8px;background:#1b2344;color:#e5e7eb;border:1px solid #2a3665
+    }
+    input[type="number"]{width:120px}
+    textarea{width:100%;min-height:120px;resize:vertical}
     .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--ring);border-radius:999px;background:#0c132b}
     .dot{width:10px;height:10px;border-radius:999px}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin:16px 0 28px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     .card{
       background:var(--card);border:1px solid #1d2748;border-radius:16px;padding:12px 12px;
       display:flex;align-items:center;gap:12px;min-height:64px;transition:border-color .2s, transform .05s
@@ -50,7 +56,7 @@
     .tag.B{background:var(--b)}
     .tag.C{background:var(--c)}
     .tag.D{background:var(--d)}
-    .card.sel{outline:2px solid #7dd3fc; outline-offset:2px; transform:translateY(-1px)}
+    .card.sel{outline:2px solid var(--accent); outline-offset:2px; transform:translateY(-1px)}
     .toast{
       position:fixed;right:14px;bottom:14px;background:#111834;border:1px solid #2a3665;
       padding:12px 14px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:10;max-width:90vw
@@ -62,6 +68,22 @@
     a.link{color:#93c5fd;text-decoration:none;border-bottom:1px dotted #93c5fd}
     a.link:hover{border-bottom-style:solid}
     code{background:#0c132b;padding:2px 6px;border:1px solid #26325a;border-radius:6px}
+    .nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+    .nav button{padding:8px 12px;border-radius:10px}
+    .nav button.active{outline:2px solid var(--accent); background:#203060}
+    .section{display:none}
+    .section.active{display:block}
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{border-bottom:1px solid #223055;padding:8px 10px;text-align:left}
+    .table th{color:#cbd5e1;font-weight:700}
+    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;background:#0c132b;border:1px solid #26325a;border-radius:6px;padding:2px 6px}
+    /* Hamburger (mobile) */
+    .hamburger{display:none}
+    @media (max-width:720px){
+      .hamburger{display:inline-flex;margin-left:auto}
+      .nav-items{display:none;width:100%;gap:8px}
+      .nav.open .nav-items{display:flex;flex-direction:column}
+    }
   </style>
 </head>
 <body>
@@ -76,14 +98,21 @@
           <span class="pill"><span class="dot" style="background:var(--d)"></span> D (51–100) <span id="cntD" class="bandCount">0/3</span></span>
         </span>
       </div>
+
+      <!-- Global controls -->
       <div class="controls">
         <button id="refreshBtn" disabled>↻ Static rankings</button>
         <button id="clearBtn">✕ Clear selections</button>
         <button id="copyBtn">⧉ Copy picks</button>
-        <div style="margin-left:auto;font-weight:700">
-          Budget left: <span id="budget">900M</span>
-        </div>
+
+        <!-- Team name + save -->
+        <span class="row" style="margin-left:auto">
+          <input id="teamName" type="text" placeholder="Your team name" style="min-width:220px" />
+          <button id="saveTeamBtn">💾 Save team</button>
+        </span>
       </div>
+
+      <!-- Filter + Budget + Admin -->
       <div class="controls" style="margin-top:8px">
         <label>
           Filter band:
@@ -95,146 +124,146 @@
             <option value="D">Band D (51–100)</option>
           </select>
         </label>
+        <div class="pill">Budget left: <span id="budget" style="margin-left:6px;font-weight:700">900M</span></div>
+        <button id="adminBtn" class="row">🔒 Admin mode</button>
       </div>
+
+      <!-- Menu -->
+      <nav class="nav" id="nav">
+        <button class="hamburger" id="hamburger">☰ Menu</button>
+        <div class="nav-items" id="navItems">
+          <button data-view="myteam" class="navbtn active">My Team</button>
+          <button data-view="teams" class="navbtn">Teams</button>
+          <button data-view="leagues" class="navbtn">Leagues</button>
+          <button data-view="stats" class="navbtn">Statistics</button>
+        </div>
+      </nav>
     </div>
   </header>
 
   <main class="wrap">
-    <h2 style="margin-top:16px">My Picks</h2>
-    <div id="selected" class="grid" aria-live="polite"></div>
+    <!-- My Team -->
+    <section id="view-myteam" class="section active">
+      <h2 style="margin-top:16px">My Picks</h2>
+      <div id="selected" class="grid" aria-live="polite"></div>
 
-    <div id="status" class="sub" role="status" aria-live="polite"></div>
-    <div id="grid" class="grid" aria-live="polite" aria-busy="true"></div>
+      <div id="status" class="sub" role="status" aria-live="polite"></div>
+      <div id="grid" class="grid" aria-live="polite" aria-busy="true"></div>
 
-    <div class="footer">
-      <p>Source: ATP Tour — Singles Rankings (numerical PDF). Snapshot date: <b>Aug 25, 2025</b>.</p>
-      <p class="sub">Bands are non-overlapping: A (1–10), B (11–30), C (31–50), D (51–100). Selections are stored locally and work offline.</p>
-    </div>
+      <div class="footer">
+        <p>Source: ATP Tour — Singles Rankings (numerical PDF). Snapshot date: <b>Aug 25, 2025</b>.</p>
+        <p class="sub">Bands are non-overlapping: A (1–10), B (11–30), C (31–50), D (51–100). Selections are stored locally and work offline.</p>
+      </div>
+    </section>
+
+    <!-- Teams -->
+    <section id="view-teams" class="section">
+      <h2>Teams</h2>
+      <div class="row" style="margin-bottom:8px">
+        <button id="exportTeamsBtn">⤴ Export teams (JSON)</button>
+        <button id="importTeamsBtn">⤵ Import teams</button>
+      </div>
+      <div id="teamsList"></div>
+      <div id="importArea" class="hide" style="margin-top:12px">
+        <p class="sub">Paste teams JSON below and click <b>Import</b>. Existing team names are kept (duplicates are skipped).</p>
+        <textarea id="importTextarea" placeholder='{"teams":{...}}'></textarea>
+        <div class="row" style="margin-top:8px">
+          <button id="confirmImportBtn">Import</button>
+          <button id="cancelImportBtn">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Leagues -->
+    <section id="view-leagues" class="section">
+      <h2>Leagues</h2>
+      <div class="row" style="gap:12px;margin-bottom:10px">
+        <fieldset class="row" style="gap:8px">
+          <legend class="sub">Join league (invite code)</legend>
+          <input id="joinCode" type="text" placeholder="Invite code" style="width:140px" />
+          <button id="joinLeagueBtn">Join with my team</button>
+        </fieldset>
+        <fieldset class="row" style="gap:8px">
+          <legend class="sub">Create league (admin)</legend>
+          <input id="leagueName" type="text" placeholder="League name" style="min-width:200px" />
+          <button id="createLeagueBtn">➕ Create</button>
+        </fieldset>
+      </div>
+
+      <div id="leaguesList"></div>
+    </section>
+
+    <!-- Statistics -->
+    <section id="view-stats" class="section">
+      <h2>Leaderboard (Total Points)</h2>
+      <table class="table" id="leaderboard">
+        <thead><tr><th>#</th><th>Team</th><th>Total Points</th><th>Budget Spent</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
   </main>
 
   <div id="toast" class="toast hide" role="alert"></div>
 
   <script>
-    // --- PWA registration ---
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js').catch(console.error);
-      });
-    }
-
-    // ---- Static Top 100 (ATP Singles — as of Aug 25, 2025) ----
-    const PLAYERS = [
-      {rank:1, name:"Jannik Sinner"},
-      {rank:2, name:"Carlos Alcaraz"},
-      {rank:3, name:"Alexander Zverev"},
-      {rank:4, name:"Taylor Fritz"},
-      {rank:5, name:"Jack Draper"},
-      {rank:6, name:"Ben Shelton"},
-      {rank:7, name:"Novak Djokovic"},
-      {rank:8, name:"Alex de Minaur"},
-      {rank:9, name:"Karen Khachanov"},
-      {rank:10, name:"Lorenzo Musetti"},
-      {rank:11, name:"Holger Rune"},
-      {rank:12, name:"Casper Ruud"},
-      {rank:13, name:"Daniil Medvedev"},
-      {rank:14, name:"Tommy Paul"},
-      {rank:15, name:"Andrey Rublev"},
-      {rank:16, name:"Jakub Mensik"},
-      {rank:17, name:"Frances Tiafoe"},
-      {rank:18, name:"Alejandro Davidovich Fokina"},
-      {rank:19, name:"Francisco Cerundolo"},
-      {rank:20, name:"Arthur Fils"},
-      {rank:21, name:"Jiri Lehecka"},
-      {rank:22, name:"Tomas Machac"},
-      {rank:23, name:"Ugo Humbert"},
-      {rank:24, name:"Alexander Bublik"},
-      {rank:25, name:"Grigor Dimitrov"},
-      {rank:26, name:"Flavio Cobolli"},
-      {rank:27, name:"Felix Auger-Aliassime"},
-      {rank:28, name:"Stefanos Tsitsipas"},
-      {rank:29, name:"Denis Shapovalov"},
-      {rank:30, name:"Tallon Griekspoor"},
-      {rank:31, name:"Brandon Nakashima"},
-      {rank:32, name:"Alex Michelsen"},
-      {rank:33, name:"Gabriel Diallo"},
-      {rank:34, name:"Luciano Darderi"},
-      {rank:35, name:"Cameron Norrie"},
-      {rank:36, name:"Alexei Popyrin"},
-      {rank:37, name:"Giovanni Mpetshi Perricard"},
-      {rank:38, name:"Alexandre Muller"},
-      {rank:39, name:"Sebastian Baez"},
-      {rank:40, name:"Corentin Moutet"},
-      {rank:41, name:"Nuno Borges"},
-      {rank:42, name:"Miomir Kecmanovic"},
-      {rank:43, name:"Camilo Ugo Carabelli"},
-      {rank:44, name:"Jaume Munar"},
-      {rank:45, name:"Joao Fonseca"},
-      {rank:46, name:"Lorenzo Sonego"},
-      {rank:47, name:"Roberto Bautista Agut"},
-      {rank:48, name:"Zizou Bergs"},
-      {rank:49, name:"Gael Monfils"},
-      {rank:50, name:"Learner Tien"},
-      {rank:51, name:"Benjamin Bonzi"},
-      {rank:52, name:"Matteo Berrettini"},
-      {rank:53, name:"Fabian Marozsan"},
-      {rank:54, name:"Francisco Comesana"},
-      {rank:55, name:"Marcos Giron"},
-      {rank:56, name:"Daniel Altmaier"},
-      {rank:57, name:"Hamad Medjedovic"},
-      {rank:58, name:"Jordan Thompson"},
-      {rank:59, name:"Tomas Martin Etcheverry"},
-      {rank:60, name:"Jacob Fearnley"},
-      {rank:61, name:"Damir Dzumhur"},
-      {rank:62, name:"Marin Cilic"},
-      {rank:63, name:"Marton Fucsovics"},
-      {rank:64, name:"Matteo Arnaldi"},
-      {rank:65, name:"Mattia Bellucci"},
-      {rank:66, name:"Pedro Martinez"},
-      {rank:67, name:"Reilly Opelka"},
-      {rank:68, name:"Hubert Hurkacz"},
-      {rank:69, name:"Terence Atmane"},
-      {rank:70, name:"Quentin Halys"},
-      {rank:71, name:"Aleksandar Kovacevic"},
-      {rank:72, name:"Laslo Djere"},
-      {rank:73, name:"Botic van de Zandschulp"},
-      {rank:74, name:"Yunchaokete Bu"},
-      {rank:75, name:"Sebastian Korda"},
-      {rank:76, name:"Kamil Majchrzak"},
-      {rank:77, name:"Adrian Mannarino"},
-      {rank:78, name:"Mariano Navone"},
-      {rank:79, name:"Arthur Cazaux"},
-      {rank:80, name:"David Goffin"},
-      {rank:81, name:"Christopher O'Connell"},
-      {rank:82, name:"Arthur Rinderknech"},
-      {rank:83, name:"Jesper de Jong"},
-      {rank:84, name:"Ethan Quinn"},
-      {rank:85, name:"Adam Walton"},
-      {rank:86, name:"Luca Nardi"},
-      {rank:87, name:"Roberto Carballes Baena"},
-      {rank:88, name:"Juan Manuel Cerundolo"},
-      {rank:89, name:"Vit Kopriva"},
-      {rank:90, name:"Kei Nishikori"},
-      {rank:91, name:"Alexander Shevchenko"},
-      {rank:92, name:"Jenson Brooksby"},
-      {rank:93, name:"Filip Misolic"},
-      {rank:94, name:"Roman Safiullin"},
-      {rank:95, name:"Aleksandar Vukic"},
-      {rank:96, name:"Tristan Schoolkate"},
-      {rank:97, name:"Dalibor Svrcina"},
-      {rank:98, name:"Valentin Royer"},
-      {rank:99, name:"Carlos Taberner"},
-      {rank:100, name:"Mackenzie McDonald"}
-    ];
-
-    // --- State ---
+    // ===== CONFIG =====
+    const ADMIN_PIN = '123456'; // <<< change this for your deployment
     const STORAGE_KEY_PICKS = 'ft.picks.v1';
+    const STORAGE_KEY_TEAMS = 'ft.teams.v1';
+    const STORAGE_KEY_LEAGUES = 'ft.leagues.v1';
+    const STORAGE_KEY_ADMIN = 'ft.admin.v1';
+    const STORAGE_KEY_MYNAME = 'ft.myTeamName.v1';
+
     const MAX_PER_BAND = 3;
     const MAX_BUDGET = 900_000_000; // 900M total budget
 
+    // ---- Static Top 100 (ATP Singles — as of Aug 25, 2025) ----
+    const PLAYERS = [
+      {rank:1, name:"Jannik Sinner"},{rank:2, name:"Carlos Alcaraz"},{rank:3, name:"Alexander Zverev"},
+      {rank:4, name:"Taylor Fritz"},{rank:5, name:"Jack Draper"},{rank:6, name:"Ben Shelton"},
+      {rank:7, name:"Novak Djokovic"},{rank:8, name:"Alex de Minaur"},{rank:9, name:"Karen Khachanov"},
+      {rank:10, name:"Lorenzo Musetti"},{rank:11, name:"Holger Rune"},{rank:12, name:"Casper Ruud"},
+      {rank:13, name:"Daniil Medvedev"},{rank:14, name:"Tommy Paul"},{rank:15, name:"Andrey Rublev"},
+      {rank:16, name:"Jakub Mensik"},{rank:17, name:"Frances Tiafoe"},{rank:18, name:"Alejandro Davidovich Fokina"},
+      {rank:19, name:"Francisco Cerundolo"},{rank:20, name:"Arthur Fils"},{rank:21, name:"Jiri Lehecka"},
+      {rank:22, name:"Tomas Machac"},{rank:23, name:"Ugo Humbert"},{rank:24, name:"Alexander Bublik"},
+      {rank:25, name:"Grigor Dimitrov"},{rank:26, name:"Flavio Cobolli"},{rank:27, name:"Felix Auger-Aliassime"},
+      {rank:28, name:"Stefanos Tsitsipas"},{rank:29, name:"Denis Shapovalov"},{rank:30, name:"Tallon Griekspoor"},
+      {rank:31, name:"Brandon Nakashima"},{rank:32, name:"Alex Michelsen"},{rank:33, name:"Gabriel Diallo"},
+      {rank:34, name:"Luciano Darderi"},{rank:35, name:"Cameron Norrie"},{rank:36, name:"Alexei Popyrin"},
+      {rank:37, name:"Giovanni Mpetshi Perricard"},{rank:38, name:"Alexandre Muller"},{rank:39, name:"Sebastian Baez"},
+      {rank:40, name:"Corentin Moutet"},{rank:41, name:"Nuno Borges"},{rank:42, name:"Miomir Kecmanovic"},
+      {rank:43, name:"Camilo Ugo Carabelli"},{rank:44, name:"Jaume Munar"},{rank:45, name:"Joao Fonseca"},
+      {rank:46, name:"Lorenzo Sonego"},{rank:47, name:"Roberto Bautista Agut"},{rank:48, name:"Zizou Bergs"},
+      {rank:49, name:"Gael Monfils"},{rank:50, name:"Learner Tien"},{rank:51, name:"Benjamin Bonzi"},
+      {rank:52, name:"Matteo Berrettini"},{rank:53, name:"Fabian Marozsan"},{rank:54, name:"Francisco Comesana"},
+      {rank:55, name:"Marcos Giron"},{rank:56, name:"Daniel Altmaier"},{rank:57, name:"Hamad Medjedovic"},
+      {rank:58, name:"Jordan Thompson"},{rank:59, name:"Tomas Martin Etcheverry"},{rank:60, name:"Jacob Fearnley"},
+      {rank:61, name:"Damir Dzumhur"},{rank:62, name:"Marin Cilic"},{rank:63, name:"Marton Fucsovics"},
+      {rank:64, name:"Matteo Arnaldi"},{rank:65, name:"Mattia Bellucci"},{rank:66, name:"Pedro Martinez"},
+      {rank:67, name:"Reilly Opelka"},{rank:68, name:"Hubert Hurkacz"},{rank:69, name:"Terence Atmane"},
+      {rank:70, name:"Quentin Halys"},{rank:71, name:"Aleksandar Kovacevic"},{rank:72, name:"Laslo Djere"},
+      {rank:73, name:"Botic van de Zandschulp"},{rank:74, name:"Yunchaokete Bu"},{rank:75, name:"Sebastian Korda"},
+      {rank:76, name:"Kamil Majchrzak"},{rank:77, name:"Adrian Mannarino"},{rank:78, name:"Mariano Navone"},
+      {rank:79, name:"Arthur Cazaux"},{rank:80, name:"David Goffin"},{rank:81, name:"Christopher O'Connell"},
+      {rank:82, name:"Arthur Rinderknech"},{rank:83, name:"Jesper de Jong"},{rank:84, name:"Ethan Quinn"},
+      {rank:85, name:"Adam Walton"},{rank:86, name:"Luca Nardi"},{rank:87, name:"Roberto Carballes Baena"},
+      {rank:88, name:"Juan Manuel Cerundolo"},{rank:89, name:"Vit Kopriva"},{rank:90, name:"Kei Nishikori"},
+      {rank:91, name:"Alexander Shevchenko"},{rank:92, name:"Jenson Brooksby"},{rank:93, name:"Filip Misolic"},
+      {rank:94, name:"Roman Safiullin"},{rank:95, name:"Aleksandar Vukic"},{rank:96, name:"Tristan Schoolkate"},
+      {rank:97, name:"Dalibor Svrcina"},{rank:98, name:"Valentin Royer"},{rank:99, name:"Carlos Taberner"},
+      {rank:100, name:"Mackenzie McDonald"}
+    ];
+
+    // ===== STATE =====
     let budget = MAX_BUDGET;
     const picks = JSON.parse(localStorage.getItem(STORAGE_KEY_PICKS) || '{"A":[],"B":[],"C":[],"D":[]}');
+    let teams = JSON.parse(localStorage.getItem(STORAGE_KEY_TEAMS) || '{"teams":{}}'); // {teams:{[name]:Team}}
+    let leagues = JSON.parse(localStorage.getItem(STORAGE_KEY_LEAGUES) || '{"leagues":{}}'); // {leagues:{[id]:League}}
+    let adminEnabled = JSON.parse(localStorage.getItem(STORAGE_KEY_ADMIN) || 'false');
+    let myTeamName = localStorage.getItem(STORAGE_KEY_MYNAME) || '';
 
-    // --- Elements ---
+    // ===== ELTS =====
     const $grid = document.getElementById('grid');
     const $status = document.getElementById('status');
     const $toast = document.getElementById('toast');
@@ -244,8 +273,31 @@
     const $cntD = document.getElementById('cntD');
     const $bandFilter = document.getElementById('bandFilter');
     const $budget = document.getElementById('budget');
+    const $teamName = document.getElementById('teamName');
+    const $saveTeamBtn = document.getElementById('saveTeamBtn');
+    const $adminBtn = document.getElementById('adminBtn');
 
-    // --- Utils ---
+    const $teamsList = document.getElementById('teamsList');
+    const $exportTeamsBtn = document.getElementById('exportTeamsBtn');
+    const $importTeamsBtn = document.getElementById('importTeamsBtn');
+    const $importArea = document.getElementById('importArea');
+    const $importTextarea = document.getElementById('importTextarea');
+    const $confirmImportBtn = document.getElementById('confirmImportBtn');
+    const $cancelImportBtn = document.getElementById('cancelImportBtn');
+
+    const $leaguesList = document.getElementById('leaguesList');
+    const $joinCode = document.getElementById('joinCode');
+    const $joinLeagueBtn = document.getElementById('joinLeagueBtn');
+    const $leagueName = document.getElementById('leagueName');
+    const $createLeagueBtn = document.getElementById('createLeagueBtn');
+
+    // Nav
+    const $nav = document.getElementById('nav');
+    const $hamburger = document.getElementById('hamburger');
+    const $navItems = document.getElementById('navItems');
+    const navButtons = Array.from(document.querySelectorAll('.navbtn'));
+
+    // ===== UTILS =====
     function bandFor(rank){
       if (rank>=1 && rank<=10) return 'A';
       if (rank>=11 && rank<=30) return 'B';
@@ -254,25 +306,21 @@
     }
     function costFor(rank){ return (101 - rank) * 1_000_000; }
     function formatM(n){ return (n/1_000_000) + 'M'; }
-    function escapeHTML(s){
-      return s.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-    }
+    function escapeHTML(s){ return s.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
     function showToast(msg){
       $toast.textContent = msg;
       $toast.classList.remove('hide');
       clearTimeout(showToast._t);
       showToast._t = setTimeout(()=> $toast.classList.add('hide'), 3000);
     }
-    function isSelected(id){
-      // check across all bands
-      return Object.values(picks).some(arr => arr.includes(id));
-    }
-    function calcSpent(){
-      return Object.values(picks).flat()
+    function isSelected(id){ return Object.values(picks).some(arr => arr.includes(id)); }
+    function calcSpentFromPicks(p){
+      return Object.values(p).flat()
         .map(id => parseInt(id.split('|')[0],10))
         .map(costFor)
         .reduce((a,b)=>a+b, 0);
     }
+    function calcSpent(){ return calcSpentFromPicks(picks); }
     function updateBudget(){
       const spent = calcSpent();
       budget = MAX_BUDGET - spent;
@@ -293,8 +341,10 @@
       if (v === 'all') return PLAYERS;
       return PLAYERS.filter(p => bandFor(p.rank) === v);
     }
+    function idNow(){ return Math.random().toString(36).slice(2,10); }
+    function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
 
-    // --- Renderers ---
+    // ===== RENDERERS =====
     function renderSelected(){
       const $sel = document.getElementById('selected');
       $sel.innerHTML = '';
@@ -306,7 +356,6 @@
         $sel.appendChild(empty);
         return;
       }
-      // Sort by rank asc
       const data = allSel.map(id => {
         const [rankStr, name] = id.split('|');
         const rank = parseInt(rankStr,10);
@@ -365,14 +414,22 @@
       $status.textContent = `Showing ${showing} players • Filter: ${map[v]} • Budget left: ${formatM(budget)}. Click a player to add/remove (max ${MAX_PER_BAND} per band).`;
     }
 
-    function renderFiltered(){
-      render(currentFilteredPlayers());
-    }
+    function renderFiltered(){ render(currentFilteredPlayers()); }
 
-    // --- Interactions ---
-    $bandFilter.addEventListener('change', () => {
-      renderFiltered();
-    });
+    // ===== NAV =====
+    function switchView(view){
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(`view-${view}`).classList.add('active');
+      document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.view===view));
+      if (view==='teams'){ renderTeamsList(); }
+      if (view==='leagues'){ renderLeaguesList(); }
+      if (view==='stats'){ renderLeaderboard(); }
+    }
+    navButtons.forEach(btn => btn.addEventListener('click', ()=> switchView(btn.dataset.view)));
+    $hamburger.addEventListener('click', ()=> $nav.classList.toggle('open'));
+
+    // ===== INTERACTIONS (My Team) =====
+    $bandFilter.addEventListener('change', renderFiltered);
 
     $grid.addEventListener('click', (e) => {
       const btn = e.target.closest('button.card');
@@ -383,13 +440,10 @@
       const rank = parseInt(btn.getAttribute('data-rank'),10);
       const cost = costFor(rank);
 
-      // Toggle selection
       if (isSelected(id)){
-        // remove
         picks[band] = picks[band].filter(x => x !== id);
         showToast('Removed from picks.');
       } else {
-        // add with validations
         if (picks[band].length >= MAX_PER_BAND){
           showToast(`Band ${band} is full (max ${MAX_PER_BAND}).`);
           return;
@@ -402,7 +456,7 @@
         showToast('Added to picks!');
       }
       updateCounters();
-      renderFiltered(); // keep the same view and refresh selection states
+      renderFiltered();
     });
 
     document.getElementById('clearBtn').addEventListener('click', () => {
@@ -416,49 +470,409 @@
     document.getElementById('copyBtn').addEventListener('click', async () => {
       const spent = calcSpent();
       const left = MAX_BUDGET - spent;
-
       function lineFor(band){
         const label = {A:'A (1–10)',B:'B (11–30)',C:'C (31–50)',D:'D (51–100)'}[band];
         if (!picks[band].length) return `${label}: —`;
-        const parts = picks[band]
-          .map(id => {
-            const [r, n] = id.split('|');
-            return `${r} ${n} (${formatM(costFor(parseInt(r,10)))})`;
-          })
-          .join(', ');
+        const parts = picks[band].map(id => {
+          const [r, n] = id.split('|');
+          return `${r} ${n} (${formatM(costFor(parseInt(r,10)))})`;
+        }).join(', ');
         return `${label}: ${parts}`;
       }
-
       const text = [
         'FantaTennis — My Picks (ATP snapshot Aug 25, 2025)',
-        lineFor('A'),
-        lineFor('B'),
-        lineFor('C'),
-        lineFor('D'),
+        lineFor('A'), lineFor('B'), lineFor('C'), lineFor('D'),
         `Total spent: ${formatM(spent)}`,
         `Budget left: ${formatM(left)}`
       ].join('\n');
-
-      try{
-        await navigator.clipboard.writeText(text);
-        showToast('Picks copied to clipboard.');
-      }catch(err){
-        // Fallback
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        try{ document.execCommand('copy'); showToast('Picks copied to clipboard.'); }
+      try{ await navigator.clipboard.writeText(text); showToast('Picks copied to clipboard.'); }
+      catch{
+        const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
+        ta.select(); try{ document.execCommand('copy'); showToast('Picks copied to clipboard.'); }
         catch{ showToast('Copy failed. You can select & copy manually.'); }
         finally{ document.body.removeChild(ta); }
       }
     });
 
-    // --- Initial render ---
+    // ===== TEAMS (Option A – local + import/export) =====
+    function getTotalPoints(team){
+      return (team.results || []).reduce((a,r)=> a + (Number(r.points)||0), 0);
+    }
+    function ensureTeamsShape(){
+      if (!teams || typeof teams !== 'object' || !teams.teams) teams = {teams:{}};
+    }
+    function saveTeams(){
+      ensureTeamsShape();
+      localStorage.setItem(STORAGE_KEY_TEAMS, JSON.stringify(teams));
+    }
+    function upsertTeam(name, teamObj){
+      ensureTeamsShape();
+      teams.teams[name] = teamObj;
+      saveTeams();
+    }
+    function teamExists(name){
+      return !!(teams.teams && teams.teams[name]);
+    }
+    function buildTeamFromCurrent(name){
+      return {
+        name,
+        picks: JSON.parse(JSON.stringify(picks)),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        results: teams.teams[name]?.results || [] // keep scoring history if updating
+      };
+    }
+    function renderTeamsList(){
+      ensureTeamsShape();
+      const all = Object.values(teams.teams);
+      const container = $teamsList;
+      container.innerHTML = '';
+      if (!all.length){
+        const p = document.createElement('p');
+        p.className = 'sub';
+        p.textContent = 'No teams saved yet. Save your team from the header to add it here.';
+        container.appendChild(p);
+        return;
+      }
+      // Sort by total points desc
+      all.sort((a,b)=> getTotalPoints(b)-getTotalPoints(a) || a.name.localeCompare(b.name));
+      for (const t of all){
+        const wrapper = document.createElement('div');
+        wrapper.className = 'card';
+        wrapper.style.flexDirection='column';
+        wrapper.style.alignItems='stretch';
+
+        const head = document.createElement('div');
+        head.className = 'row';
+        head.style.justifyContent='space-between';
+        head.innerHTML = `
+          <div style="font-weight:800">${escapeHTML(t.name)}</div>
+          <div class="sub">Points: <b>${getTotalPoints(t)}</b> • Spent: <b>${formatM(calcSpentFromPicks(t.picks))}</b></div>
+        `;
+
+        const picksDiv = document.createElement('div');
+        picksDiv.className = 'sub';
+        function fmtBand(b){
+          const label = {A:'A',B:'B',C:'C',D:'D'}[b];
+          const list = (t.picks[b]||[]).map(id => id.split('|')[1]).join(', ') || '—';
+          return `<span><b>${label}:</b> ${escapeHTML(list)}</span>`;
+        }
+        picksDiv.innerHTML = `<div class="row" style="gap:14px">${fmtBand('A')} ${fmtBand('B')} ${fmtBand('C')} ${fmtBand('D')}</div>`;
+
+        // Score history table
+        const table = document.createElement('table');
+        table.className = 'table';
+        const rows = (t.results||[]).slice().sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+        table.innerHTML = `
+          <thead><tr><th style="width:40%">Tournament</th><th style="width:20%">Date</th><th style="width:20%">Points</th><th style="width:20%"></th></tr></thead>
+          <tbody>
+            ${rows.map(r => `
+              <tr data-id="${r.id}">
+                <td>${escapeHTML(r.tournament||'')}</td>
+                <td>${escapeHTML(r.date||'')}</td>
+                <td>${Number(r.points)||0}</td>
+                <td>${adminEnabled ? `<button data-action="del" data-team="${encodeURIComponent(t.name)}" data-res="${r.id}">Delete</button>` : ''}</td>
+              </tr>
+            `).join('')}
+            ${rows.length===0 ? `<tr><td colspan="4" class="sub">No results yet.</td></tr>`:''}
+          </tbody>
+        `;
+
+        // Add result (admins only)
+        const form = document.createElement('div');
+        form.className = 'row';
+        form.style.marginTop='8px';
+        form.innerHTML = `
+          <input type="text" placeholder="Tournament name" data-field="tournament" ${!adminEnabled?'disabled':''} />
+          <input type="number" placeholder="Points" data-field="points" min="0" step="1" ${!adminEnabled?'disabled':''} />
+          <input type="date" data-field="date" value="${todayISO()}" ${!adminEnabled?'disabled':''} />
+          <button data-action="addResult" data-team="${encodeURIComponent(t.name)}" ${!adminEnabled?'disabled':''}>Add Result</button>
+          ${!adminEnabled? '<span class="sub">Admin mode required</span>':''}
+        `;
+
+        wrapper.appendChild(head);
+        wrapper.appendChild(picksDiv);
+        wrapper.appendChild(table);
+        wrapper.appendChild(form);
+        container.appendChild(wrapper);
+      }
+
+      // Table button wiring (delete/add)
+      container.querySelectorAll('button[data-action="del"]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          if (!adminEnabled){ showToast('Admin only.'); return; }
+          const teamName = decodeURIComponent(btn.getAttribute('data-team'));
+          const resId = btn.getAttribute('data-res');
+          const team = teams.teams[teamName];
+          if (!team) return;
+          team.results = (team.results||[]).filter(r => r.id !== resId);
+          team.updatedAt = new Date().toISOString();
+          upsertTeam(teamName, team);
+          renderTeamsList();
+          renderLeaderboard();
+          renderLeaguesList();
+          showToast('Result removed.');
+        });
+      });
+      container.querySelectorAll('button[data-action="addResult"]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          if (!adminEnabled){ showToast('Admin only.'); return; }
+          const card = btn.closest('.card');
+          const teamName = decodeURIComponent(btn.getAttribute('data-team'));
+          const team = teams.teams[teamName];
+          const tournament = card.querySelector('input[data-field="tournament"]').value.trim();
+          const points = Number(card.querySelector('input[data-field="points"]').value);
+          const date = card.querySelector('input[data-field="date"]').value || todayISO();
+          if (!tournament){ showToast('Tournament name required.'); return; }
+          if (isNaN(points)){ showToast('Points must be a number.'); return; }
+          team.results = team.results || [];
+          team.results.push({id:idNow(), tournament, points, date});
+          team.updatedAt = new Date().toISOString();
+          upsertTeam(teamName, team);
+          renderTeamsList();
+          renderLeaderboard();
+          renderLeaguesList();
+          showToast('Result added.');
+        });
+      });
+    }
+
+    // Save team from header
+    $saveTeamBtn.addEventListener('click', ()=>{
+      const name = ($teamName.value || '').trim();
+      if (!name){ showToast('Enter a team name.'); return; }
+      // Uniqueness: if name exists, confirm update
+      if (teamExists(name)){
+        if (!confirm('Team name already exists. Update that team with your current picks?')) return;
+      }
+      const team = buildTeamFromCurrent(name);
+      upsertTeam(name, team);
+      myTeamName = name;
+      localStorage.setItem(STORAGE_KEY_MYNAME, myTeamName);
+      renderTeamsList();
+      renderLeaderboard();
+      renderLeaguesList();
+      showToast('Team saved.');
+    });
+
+    // Initialize team name field
+    if (myTeamName){ $teamName.value = myTeamName; }
+
+    // Export/Import
+    $exportTeamsBtn.addEventListener('click', async ()=>{
+      const payload = JSON.stringify(teams, null, 2);
+      try{ await navigator.clipboard.writeText(payload); showToast('Teams JSON copied to clipboard.'); }
+      catch{
+        const ta=document.createElement('textarea'); ta.value=payload; document.body.appendChild(ta);
+        ta.select(); try{ document.execCommand('copy'); showToast('Teams JSON copied to clipboard.'); }
+        catch{ showToast('Copy failed. You can select & copy manually.'); }
+        finally{ document.body.removeChild(ta); }
+      }
+    });
+    $importTeamsBtn.addEventListener('click', ()=>{ $importArea.classList.remove('hide'); });
+    $cancelImportBtn.addEventListener('click', ()=>{
+      $importArea.classList.add('hide'); $importTextarea.value='';
+    });
+    $confirmImportBtn.addEventListener('click', ()=>{
+      let obj;
+      try{ obj = JSON.parse($importTextarea.value); }catch(e){ showToast('Invalid JSON.'); return; }
+      if (!obj || typeof obj!=='object' || !obj.teams){ showToast('JSON must be of shape {"teams":{...}}'); return; }
+      const incoming = obj.teams;
+      ensureTeamsShape();
+      let added=0, skipped=0;
+      for (const [name, team] of Object.entries(incoming)){
+        if (teams.teams[name]){ skipped++; continue; }
+        // Basic sanitize
+        team.name = name;
+        team.results = Array.isArray(team.results)? team.results : [];
+        teams.teams[name]=team; added++;
+      }
+      saveTeams();
+      renderTeamsList();
+      renderLeaderboard();
+      renderLeaguesList();
+      showToast(`Import complete: ${added} added, ${skipped} skipped.`);
+      $importArea.classList.add('hide');
+      $importTextarea.value='';
+    });
+
+    // ===== ADMIN MODE =====
+    function updateAdminUI(){
+      $adminBtn.textContent = adminEnabled ? '✅ Admin ON' : '🔒 Admin mode';
+      renderTeamsList();
+      renderLeaguesList();
+    }
+    $adminBtn.addEventListener('click', ()=>{
+      if (adminEnabled){
+        adminEnabled = false;
+        localStorage.setItem(STORAGE_KEY_ADMIN, JSON.stringify(adminEnabled));
+        updateAdminUI();
+        showToast('Admin disabled.');
+        return;
+      }
+      const pin = prompt('Enter admin PIN');
+      if (pin === ADMIN_PIN){
+        adminEnabled = true;
+        localStorage.setItem(STORAGE_KEY_ADMIN, JSON.stringify(adminEnabled));
+        updateAdminUI();
+        showToast('Admin enabled.');
+      } else {
+        showToast('Incorrect PIN.');
+      }
+    });
+
+    // ===== LEAGUES =====
+    function ensureLeaguesShape(){
+      if (!leagues || typeof leagues !== 'object' || !leagues.leagues) leagues = {leagues:{}};
+    }
+    function saveLeagues(){ ensureLeaguesShape(); localStorage.setItem(STORAGE_KEY_LEAGUES, JSON.stringify(leagues)); }
+    function createLeague(name){
+      const id = idNow();
+      const inviteCode = Math.random().toString(36).slice(2,8).toUpperCase();
+      leagues.leagues[id] = {id, name, inviteCode, createdAt:new Date().toISOString(), members:[]};
+      saveLeagues();
+      return leagues.leagues[id];
+    }
+    function findLeagueByCode(code){
+      ensureLeaguesShape();
+      code = (code||'').trim().toUpperCase();
+      return Object.values(leagues.leagues).find(l => l.inviteCode.toUpperCase()===code);
+    }
+    function renderLeaguesList(){
+      ensureLeaguesShape();
+      const container = $leaguesList;
+      container.innerHTML = '';
+      const all = Object.values(leagues.leagues);
+      if (!all.length){
+        const p = document.createElement('p');
+        p.className = 'sub';
+        p.textContent = 'No leagues yet. Admins can create one above.';
+        container.appendChild(p);
+        return;
+      }
+      // Sort by createdAt
+      all.sort((a,b)=> (a.createdAt||'').localeCompare(b.createdAt||''));
+      for (const L of all){
+        const wrap = document.createElement('div');
+        wrap.className='card';
+        wrap.style.flexDirection='column';
+        wrap.style.alignItems='stretch';
+
+        // Members table
+        const memberTeams = (L.members||[])
+          .map(name => teams.teams[name])
+          .filter(Boolean)
+          .sort((a,b)=> getTotalPoints(b)-getTotalPoints(a) || a.name.localeCompare(b.name));
+
+        const table = `
+          <table class="table">
+            <thead><tr><th style="width:5%">#</th><th style="width:45%">Team</th><th style="width:25%">Total Points</th><th style="width:25%">Spent</th></tr></thead>
+            <tbody>
+              ${memberTeams.map((t,i)=>`
+                <tr><td>${i+1}</td><td>${escapeHTML(t.name)}</td><td>${getTotalPoints(t)}</td><td>${formatM(calcSpentFromPicks(t.picks))}</td></tr>
+              `).join('')}
+              ${memberTeams.length===0? `<tr><td colspan="4" class="sub">No members yet.</td></tr>`: ''}
+            </tbody>
+          </table>`;
+
+        wrap.innerHTML = `
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:800">${escapeHTML(L.name)}</div>
+              <div class="sub">Invite code: <span class="kbd">${L.inviteCode}</span></div>
+            </div>
+            <div class="row">
+              <button data-action="copyCode" data-code="${L.inviteCode}">Copy code</button>
+              ${adminEnabled? `<button data-action="deleteLeague" data-id="${L.id}">Delete</button>`:''}
+            </div>
+          </div>
+          <div style="margin-top:8px">${table}</div>
+        `;
+        container.appendChild(wrap);
+      }
+      // Wire actions
+      container.querySelectorAll('button[data-action="copyCode"]').forEach(b=>{
+        b.addEventListener('click', async ()=>{
+          const code = b.getAttribute('data-code');
+          try{ await navigator.clipboard.writeText(code); showToast('Invite code copied.'); }
+          catch{ showToast('Copy failed.'); }
+        });
+      });
+      container.querySelectorAll('button[data-action="deleteLeague"]').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          if (!adminEnabled){ showToast('Admin only.'); return; }
+          const id = b.getAttribute('data-id');
+          if (!confirm('Delete this league?')) return;
+          delete leagues.leagues[id];
+          saveLeagues();
+          renderLeaguesList();
+          showToast('League deleted.');
+        });
+      });
+    }
+
+    $createLeagueBtn.addEventListener('click', ()=>{
+      if (!adminEnabled){ showToast('Admin only.'); return; }
+      const name = ($leagueName.value||'').trim();
+      if (!name){ showToast('League name required.'); return; }
+      const L = createLeague(name);
+      $leagueName.value='';
+      renderLeaguesList();
+      showToast(`League created. Code: ${L.inviteCode}`);
+    });
+
+    $joinLeagueBtn.addEventListener('click', ()=>{
+      const code = ($joinCode.value||'').trim().toUpperCase();
+      if (!code){ showToast('Enter invite code.'); return; }
+      if (!myTeamName || !teams.teams[myTeamName]){ showToast('Save your team first (top right).'); return; }
+      const L = findLeagueByCode(code);
+      if (!L){ showToast('League not found.'); return; }
+      if (!L.members) L.members=[];
+      if (L.members.includes(myTeamName)){ showToast('Your team is already in this league.'); return; }
+      L.members.push(myTeamName);
+      saveLeagues();
+      $joinCode.value='';
+      renderLeaguesList();
+      showToast('Joined league!');
+    });
+
+    // ===== STATS =====
+    function renderLeaderboard(){
+      const tbody = document.querySelector('#leaderboard tbody');
+      tbody.innerHTML = '';
+      const all = Object.values(teams.teams || {});
+      if (!all.length){
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="4" class="sub">No teams yet.</td>`;
+        tbody.appendChild(tr);
+        return;
+      }
+      all.sort((a,b)=> getTotalPoints(b)-getTotalPoints(a) || a.name.localeCompare(b.name));
+      all.forEach((t,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${i+1}</td><td>${escapeHTML(t.name)}</td><td>${getTotalPoints(t)}</td><td>${formatM(calcSpentFromPicks(t.picks))}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ===== INIT =====
+    // Default league (global)
+    ensureLeaguesShape();
+    if (!Object.keys(leagues.leagues).length){
+      const global = createLeague('Global League');
+      // optional: auto-join your team when saved later
+    }
+
+    // Admin UI
+    updateAdminUI();
+
     // Ensure budget label starts at the correct value
     $budget.textContent = formatM(budget);
     updateCounters();    // sets counters, budget, selected section, status
     renderFiltered();    // paints the grid according to current filter ("All" by default)
+
+    // Persist my team name in field if present
+    if (myTeamName) $teamName.value = myTeamName;
   </script>
 </body>
 </html>
