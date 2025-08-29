@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FantaTennis App</title>
+  <meta name="description" content="Pick your fantasy tennis squad from the ATP Top 100." />
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon1-180.png" />
+  <style>
+    :root{
+      --bg:#0b1020; --card:#111834; --text:#e5e7eb; --muted:#9aa4b2;
+      --a:#ef4444; /* red A: ranks 1–10 */
+      --b:#3b82f6; /* blue B: ranks 11–30 */
+      --c:#10b981; /* green C: ranks 31–50 */
+      --d:#f59e0b; /* yellow D: ranks 51–100 */
+      --ok:#22c55e; --warn:#f97316; --ring:#334155;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0a0f1f 0%, #0f1731 100%);color:var(--text)}
+    header{position:sticky;top:0;background:rgba(11,16,32,0.8);backdrop-filter:blur(10px);border-bottom:1px solid #1f2a44;z-index:5}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    h1{margin:4px 0 6px;font-size:1.5rem;letter-spacing:.2px}
+    .sub{color:var(--muted);font-size:.9rem}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    button{
+      background:#1b2344;color:#e5e7eb;border:1px solid #2a3665;border-radius:12px;
+      padding:10px 14px;font-weight:600;cursor:pointer;transition:.2s;box-shadow:0 1px 0 #000 inset
+    }
+    button:hover{transform:translateY(-1px);background:#1f2a55}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--ring);border-radius:999px;background:#0c132b}
+    .dot{width:10px;height:10px;border-radius:999px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin:16px 0 28px}
+    .card{
+      background:var(--card);border:1px solid #1d2748;border-radius:16px;padding:12px 12px;
+      display:flex;align-items:center;gap:12px;min-height:64px;transition:border-color .2s, transform .05s
+    }
+    .card:hover{border-color:#2a3a6a}
+    .rank{
+      width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+      background:#0c132b;border:1px solid #26325a;color:#cbd5e1;font-weight:700
+    }
+    .name{font-weight:700;letter-spacing:.2px}
+    .meta{color:var(--muted);font-size:.85rem;margin-top:2px}
+    .tag{
+      margin-left:auto;font-weight:800;display:inline-flex;align-items:center;justify-content:center;
+      width:28px;height:28px;border-radius:8px;color:#0b1020
+    }
+    .tag.A{background:var(--a)}
+    .tag.B{background:var(--b)}
+    .tag.C{background:var(--c)}
+    .tag.D{background:var(--d)}
+    .card.sel{outline:2px solid #7dd3fc; outline-offset:2px; transform:translateY(-1px)}
+    .toast{
+      position:fixed;right:14px;bottom:14px;background:#111834;border:1px solid #2a3665;
+      padding:12px 14px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:10;max-width:90vw
+    }
+    .hide{display:none}
+    .footer{color:var(--muted);font-size:.85rem;margin:20px 0 40px}
+    .bad{color:#fca5a5}
+    .good{color:var(--ok)}
+    .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+    .bandCount{font-weight:700}
+    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+    a.link{color:#93c5fd;text-decoration:none;border-bottom:1px dotted #93c5fd}
+    a.link:hover{border-bottom-style:solid}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>FantaTennis</h1>
+      <div class="sub">Pick up to <b>3 players per band</b> from the official ATP Top 100.
+        <span class="legend">
+          <span class="pill"><span class="dot" style="background:var(--a)"></span> A (1–10) <span id="cntA" class="bandCount">0/3</span></span>
+          <span class="pill"><span class="dot" style="background:var(--b)"></span> B (11–30) <span id="cntB" class="bandCount">0/3</span></span>
+          <span class="pill"><span class="dot" style="background:var(--c)"></span> C (31–50) <span id="cntC" class="bandCount">0/3</span></span>
+          <span class="pill"><span class="dot" style="background:var(--d)"></span> D (51–100) <span id="cntD" class="bandCount">0/3</span></span>
+        </span>
+      </div>
+      <div class="controls">
+        <button id="refreshBtn" title="Fetch latest ATP rankings">↻ Refresh rankings</button>
+        <button id="clearBtn" title="Clear all selections">✕ Clear selections</button>
+        <button id="copyBtn" title="Copy your picks">⧉ Copy picks</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="status" class="sub" role="status" aria-live="polite"></div>
+    <div id="grid" class="grid" aria-live="polite" aria-busy="true"></div>
+    <div class="footer">
+      <p>Source: <a class="link" href="https://www.atptour.com/en/rankings/singles" target="_blank" rel="noopener">ATP Tour — Singles Rankings</a>.</p>
+      <p class="sub">Notes: Band boundaries are non-overlapping (A: 1–10, B: 11–30, C: 31–50, D: 51–100). This app caches your last successful fetch for offline use.</p>
+    </div>
+  </main>
+
+  <div id="toast" class="toast hide" role="alert"></div>
+
+  <script>
+    // --- PWA registration ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch(console.error);
+      });
+    }
+
+    // --- Data + state ---
+    const STORAGE_KEY_PLAYERS = 'ft.players.v1';
+    const STORAGE_KEY_PICKS   = 'ft.picks.v1';
+    const MAX_PER_BAND = 3;
+    const picks = JSON.parse(localStorage.getItem(STORAGE_KEY_PICKS) || '{"A":[],"B":[],"C":[],"D":[]}');
+
+    const $grid = document.getElementById('grid');
+    const $status = document.getElementById('status');
+    const $toast = document.getElementById('toast');
+
+    const $cntA = document.getElementById('cntA');
+    const $cntB = document.getElementById('cntB');
+    const $cntC = document.getElementById('cntC');
+    const $cntD = document.getElementById('cntD');
+
+    const SOURCES = [
+      // We fetch readable text via r.jina.ai to avoid CORS issues and then parse ranks.
+      'https://r.jina.ai/http://www.atptour.com/en/rankings/singles',
+      // fallbacks if needed:
+      'https://r.jina.ai/http://www.espn.com/tennis/rankings',
+      'https://r.jina.ai/http://live-tennis.eu/en/official-atp-ranking',
+      'https://r.jina.ai/http://tennisstats.com/rankings/atp'
+    ];
+
+    function bandFor(rank){
+      if (rank>=1 && rank<=10) return 'A';
+      if (rank>=11 && rank<=30) return 'B';
+      if (rank>=31 && rank<=50) return 'C';
+      return 'D'; // 51–100
+    }
+
+    function showToast(msg, tone=''){
+      $toast.textContent = msg;
+      $toast.classList.remove('hide');
+      if (tone==='bad') {$toast.style.borderColor="#7f1d1d"; $toast.style.color="#fecaca";}
+      else {$toast.style.borderColor="#2a3665"; $toast.style.color="#e5e7eb";}
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=> $toast.classList.add('hide'), 3200);
+    }
+
+    function updateCounters(){
+      $cntA.textContent = `${picks.A.length}/${MAX_PER_BAND}`;
+      $cntB.textContent = `${picks.B.length}/${MAX_PER_BAND}`;
+      $cntC.textContent = `${picks.C.length}/${MAX_PER_BAND}`;
+      $cntD.textContent = `${picks.D.length}/${MAX_PER_BAND}`;
+      localStorage.setItem(STORAGE_KEY_PICKS, JSON.stringify(picks));
+    }
+
+    function savePlayers(players){
+      localStorage.setItem(STORAGE_KEY_PLAYERS, JSON.stringify({ts:Date.now(), players}));
+    }
+
+    function loadCachedPlayers(){
+      try{
+        const cached = JSON.parse(localStorage.getItem(STORAGE_KEY_PLAYERS) || 'null');
+        return cached?.players || null;
+      }catch{ return null; }
+    }
+
+    function render(players){
+      $grid.setAttribute('aria-busy','false');
+      $grid.innerHTML = '';
+      for (const p of players){
+        const card = document.createElement('button');
+        card.className = 'card';
+        card.setAttribute('data-id', p.rank + '|' + p.name);
+        card.setAttribute('data-band', p.band);
+        card.setAttribute('aria-pressed', 'false');
+        card.title = `Select ${p.name} (${p.band})`;
+
+        const picked = picks[p.band].includes(card.dataset.id);
+        if (picked) { card.classList.add('sel'); card.setAttribute('aria-pressed','true'); }
+
+        card.innerHTML = `
+          <div class="rank">${p.rank}</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div class="name">${p.name}</div>
+            <div class="meta">Band ${p.band}</div>
+          </div>
+          <div class="tag ${p.band}" aria-hidden="true">${p.band}</div>
+        `;
+
+        card.addEventListener('click', () => {
+          const id = card.dataset.id;
+          const b = card.dataset.band;
+          const list = picks[b];
+
+          if (card.classList.contains('sel')) {
+            // unselect
+            picks[b] = list.filter(x => x !== id);
+            card.classList.remove('sel');
+            card.setAttribute('aria-pressed','false');
+          } else {
+            if (list.length >= MAX_PER_BAND) {
+              showToast(`Max ${MAX_PER_BAND} picks allowed in band ${b}.`, 'bad');
+              return;
+            }
+            list.push(id);
+            card.classList.add('sel');
+            card.setAttribute('aria-pressed','true');
+          }
+          updateCounters();
+        });
+
+        $grid.appendChild(card);
+      }
+      updateCounters();
+    }
+
+    // --- Parsing helpers (robust against different sources) ---
+    function parseTop100FromText(txt){
+      // Primary pattern: "rank  Name Name  age  points"
+      const re1 = /^(\d{1,3})\s+([A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]+?)\s+\d{1,2}\s+[\d,\.]{2,}/gm;
+      // Secondary pattern: "rank  Name Name  points"
+      const re2 = /^(\d{1,3})\s+([A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]+?)\s+[\d,\.]{2,}\b/gm;
+
+      let out = [];
+      let m;
+      while ((m = re1.exec(txt)) !== null) {
+        const rank = parseInt(m[1],10);
+        const name = m[2].trim().replace(/\s+/g,' ');
+        if (rank>=1 && rank<=100 && isLikelyName(name)) out.push({rank, name});
+      }
+      if (out.length < 90) { // try fallback
+        while ((m = re2.exec(txt)) !== null) {
+          const rank = parseInt(m[1],10);
+          const name = m[2].trim().replace(/\s+/g,' ');
+          if (rank>=1 && rank<=100 && isLikelyName(name)) out.push({rank, name});
+        }
+      }
+
+      // Deduplicate by rank
+      const byRank = new Map();
+      for (const p of out) if (!byRank.has(p.rank)) byRank.set(p.rank, p);
+      out = Array.from(byRank.values()).sort((a,b)=>a.rank-b.rank).slice(0,100);
+
+      // attach band
+      out = out.map(p => ({...p, band: bandFor(p.rank)}));
+      return out;
+    }
+
+    function isLikelyName(s){
+      // Filter obvious non-player strings that occasionally get captured
+      const bad = /(ATP|Staff|News|Profile|Header|Download|App|Schedule|Draw|Partner)/i;
+      return !bad.test(s) && s.split(' ').length <= 4 && s.length >= 3;
+    }
+
+    async function fetchTop100(){
+      $status.textContent = 'Loading rankings…';
+      $grid.setAttribute('aria-busy','true');
+
+      for (const url of SOURCES){
+        try{
+          const res = await fetch(url, {mode:'cors'});
+          if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+          const txt = await res.text();
+          const players = parseTop100FromText(txt);
+          if (players.length >= 80) { // good enough, usually 100
+            savePlayers(players);
+            $status.innerHTML = `Loaded ${players.length} players from <code>${new URL(url).hostname}</code>.`;
+            render(players);
+            return players;
+          }
+        }catch(e){
+          // try next source
+        }
+      }
+
+      // Fallback: cached or error
+      const cached = loadCachedPlayers();
+      if (cached?.length) {
+        $status.innerHTML = `<span class="bad">Couldn’t refresh.</span> Showing cached rankings from last session.`;
+        render(cached);
+        return cached;
+      } else {
+        $status.innerHTML = `<span class="bad">Couldn’t load rankings.</span> Please try Refresh (↻).`;
+        $grid.innerHTML = '';
+        return [];
+      }
+    }
+
+    // --- Controls ---
+    document.getElementById('refreshBtn').addEventListener('click', () => fetchTop100());
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      picks.A = []; picks.B = []; picks.C = []; picks.D = [];
+      updateCounters();
+      document.querySelectorAll('.card.sel').forEach(el => { el.classList.remove('sel'); el.setAttribute('aria-pressed','false'); });
+      showToast('Selections cleared.');
+    });
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      const selections = Object.fromEntries(['A','B','C','D'].map(b => [b, picks[b].map(id => id.split('|')[1])]));
+      const txt = `My FantaTennis picks:\nA: ${selections.A.join(', ') || '-'}\nB: ${selections.B.join(', ') || '-'}\nC: ${selections.C.join(', ') || '-'}\nD: ${selections.D.join(', ') || '-'}`;
+      try { await navigator.clipboard.writeText(txt); showToast('Picks copied to clipboard!', 'good'); }
+      catch { showToast('Copy failed. You can select & copy manually.', 'bad'); }
+    });
+
+    // Initial load: show cached immediately (if any), then refresh
+    const bootCached = loadCachedPlayers();
+    if (bootCached?.length){ render(bootCached); $status.textContent = 'Showing cached rankings. Refreshing…'; }
+    fetchTop100();
+  </script>
+</body>
+</html>
