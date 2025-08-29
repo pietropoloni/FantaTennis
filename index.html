@@ -66,6 +66,7 @@
     .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
     a.link{color:#93c5fd;text-decoration:none;border-bottom:1px dotted #93c5fd}
     a.link:hover{border-bottom-style:solid}
+    code{background:#0c132b;padding:2px 6px;border:1px solid #26325a;border-radius:6px}
   </style>
 </head>
 <body>
@@ -93,7 +94,7 @@
     <div id="grid" class="grid" aria-live="polite" aria-busy="true"></div>
     <div class="footer">
       <p>Source: <a class="link" href="https://www.atptour.com/en/rankings/singles" target="_blank" rel="noopener">ATP Tour — Singles Rankings</a>.</p>
-      <p class="sub">Notes: Band boundaries are non-overlapping (A: 1–10, B: 11–30, C: 31–50, D: 51–100). This app caches your last successful fetch for offline use.</p>
+      <p class="sub">Bands are non-overlapping: A (1–10), B (11–30), C (31–50), D (51–100). Data is cached for offline use.</p>
     </div>
   </main>
 
@@ -108,7 +109,7 @@
     }
 
     // --- Data + state ---
-    const STORAGE_KEY_PLAYERS = 'ft.players.v1';
+    const STORAGE_KEY_PLAYERS = 'ft.players.v2'; // bumped to avoid stale cache
     const STORAGE_KEY_PICKS   = 'ft.picks.v1';
     const MAX_PER_BAND = 3;
     const picks = JSON.parse(localStorage.getItem(STORAGE_KEY_PICKS) || '{"A":[],"B":[],"C":[],"D":[]}');
@@ -116,19 +117,18 @@
     const $grid = document.getElementById('grid');
     const $status = document.getElementById('status');
     const $toast = document.getElementById('toast');
-
     const $cntA = document.getElementById('cntA');
     const $cntB = document.getElementById('cntB');
     const $cntC = document.getElementById('cntC');
     const $cntD = document.getElementById('cntD');
 
+    // --- Use AllOrigins to bypass CORS reliably ---
+    const RAW = (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`;
     const SOURCES = [
-      // We fetch readable text via r.jina.ai to avoid CORS issues and then parse ranks.
-      'https://r.jina.ai/http://www.atptour.com/en/rankings/singles',
-      // fallbacks if needed:
-      'https://r.jina.ai/http://www.espn.com/tennis/rankings',
-      'https://r.jina.ai/http://live-tennis.eu/en/official-atp-ranking',
-      'https://r.jina.ai/http://tennisstats.com/rankings/atp'
+      RAW('https://www.atptour.com/en/rankings/singles'),
+      RAW('https://www.espn.com/tennis/rankings'),
+      RAW('https://live-tennis.eu/en/official-atp-ranking'),
+      RAW('https://tennisstats.com/rankings/atp')
     ];
 
     function bandFor(rank){
@@ -158,7 +158,6 @@
     function savePlayers(players){
       localStorage.setItem(STORAGE_KEY_PLAYERS, JSON.stringify({ts:Date.now(), players}));
     }
-
     function loadCachedPlayers(){
       try{
         const cached = JSON.parse(localStorage.getItem(STORAGE_KEY_PLAYERS) || 'null');
@@ -195,7 +194,6 @@
           const list = picks[b];
 
           if (card.classList.contains('sel')) {
-            // unselect
             picks[b] = list.filter(x => x !== id);
             card.classList.remove('sel');
             card.setAttribute('aria-pressed','false');
@@ -216,42 +214,52 @@
       updateCounters();
     }
 
-    // --- Parsing helpers (robust against different sources) ---
-    function parseTop100FromText(txt){
-      // Primary pattern: "rank  Name Name  age  points"
-      const re1 = /^(\d{1,3})\s+([A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]+?)\s+\d{1,2}\s+[\d,\.]{2,}/gm;
-      // Secondary pattern: "rank  Name Name  points"
-      const re2 = /^(\d{1,3})\s+([A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]+?)\s+[\d,\.]{2,}\b/gm;
+    // --- Parsing helpers (more tolerant) ---
+    function normalizeName(s){
+      return s.replace(/\s+/g,' ').replace(/\(.*?\)/g,'').trim();
+    }
+    function isLikelyName(s){
+      const bad = /(ATP|Staff|News|Profile|Header|Download|App|Schedule|Draw|Partner|Race|Doubles|Live|Rankings|Subscribe|Cookie)/i;
+      return !bad.test(s) && s.split(' ').length <= 4 && s.length >= 3;
+    }
 
+    function parseTop100FromText(txt){
       let out = [];
       let m;
+
+      // Pattern A: "rank  Name Name  age  points"
+      let re1 = /^(\d{1,3})\s+([A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]+?)\s+\d{1,2}\s+[\d,\.]{2,}/gm;
       while ((m = re1.exec(txt)) !== null) {
         const rank = parseInt(m[1],10);
-        const name = m[2].trim().replace(/\s+/g,' ');
+        const name = normalizeName(m[2]);
         if (rank>=1 && rank<=100 && isLikelyName(name)) out.push({rank, name});
       }
-      if (out.length < 90) { // try fallback
+
+      // Pattern B: "rank  Name Name  points" (no age)
+      if (out.length < 80){
+        let re2 = /^(\d{1,3})\s+([A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]+?)(?:\s+\([A-Z]{3}\))?\s+[\d,\.]{2,}\b/gm;
         while ((m = re2.exec(txt)) !== null) {
           const rank = parseInt(m[1],10);
-          const name = m[2].trim().replace(/\s+/g,' ');
+          const name = normalizeName(m[2]);
           if (rank>=1 && rank<=100 && isLikelyName(name)) out.push({rank, name});
         }
       }
 
-      // Deduplicate by rank
+      // Pattern C (HTML tables): ...<td>rank</td>...<td>name</td>...
+      if (out.length < 80){
+        let re3 = />(\d{1,3})<\/td>\s*<td[^>]*>(?:<a[^>]*>)?([A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]+?)(?:<\/a>)?<\/td>/gmi;
+        while ((m = re3.exec(txt)) !== null) {
+          const rank = parseInt(m[1],10);
+          const name = normalizeName(m[2]);
+          if (rank>=1 && rank<=100 && isLikelyName(name)) out.push({rank, name});
+        }
+      }
+
+      // Deduplicate by rank, sort, band
       const byRank = new Map();
       for (const p of out) if (!byRank.has(p.rank)) byRank.set(p.rank, p);
       out = Array.from(byRank.values()).sort((a,b)=>a.rank-b.rank).slice(0,100);
-
-      // attach band
-      out = out.map(p => ({...p, band: bandFor(p.rank)}));
-      return out;
-    }
-
-    function isLikelyName(s){
-      // Filter obvious non-player strings that occasionally get captured
-      const bad = /(ATP|Staff|News|Profile|Header|Download|App|Schedule|Draw|Partner)/i;
-      return !bad.test(s) && s.split(' ').length <= 4 && s.length >= 3;
+      return out.map(p => ({...p, band: bandFor(p.rank)}));
     }
 
     async function fetchTop100(){
@@ -260,29 +268,28 @@
 
       for (const url of SOURCES){
         try{
-          const res = await fetch(url, {mode:'cors'});
+          const res = await fetch(url, {cache:'no-store'}); // avoid stale proxy cache
           if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
           const txt = await res.text();
           const players = parseTop100FromText(txt);
-          if (players.length >= 80) { // good enough, usually 100
+          if (players.length >= 80) { // good enough (usually 100)
             savePlayers(players);
             $status.innerHTML = `Loaded ${players.length} players from <code>${new URL(url).hostname}</code>.`;
             render(players);
             return players;
           }
         }catch(e){
-          // try next source
+          console.warn('Fetch/parsing failed for', url, e);
         }
       }
 
-      // Fallback: cached or error
       const cached = loadCachedPlayers();
       if (cached?.length) {
         $status.innerHTML = `<span class="bad">Couldn’t refresh.</span> Showing cached rankings from last session.`;
         render(cached);
         return cached;
       } else {
-        $status.innerHTML = `<span class="bad">Couldn’t load rankings.</span> Please try Refresh (↻).`;
+        $status.innerHTML = `<span class="bad">Couldn’t load rankings.</span> Check network/AdBlock and try Refresh (↻).`;
         $grid.innerHTML = '';
         return [];
       }
@@ -303,7 +310,7 @@
       catch { showToast('Copy failed. You can select & copy manually.', 'bad'); }
     });
 
-    // Initial load: show cached immediately (if any), then refresh
+    // --- Boot: show cached immediately (if any), then refresh ---
     const bootCached = loadCachedPlayers();
     if (bootCached?.length){ render(bootCached); $status.textContent = 'Showing cached rankings. Refreshing…'; }
     fetchTop100();
