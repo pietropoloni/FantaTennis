@@ -71,11 +71,18 @@
     .drawer.open .panel{transform:translateX(0)}
     .drawer.open .backdrop{opacity:1}
 
-    /* HOME */
+    /* Sections are hidden until chosen from the menu */
+    .section{display:none}
+    .section.active{display:block}
+
+    /* HOME (only visible when active) */
     #view-home{
-      position:relative;min-height:calc(100vh - 72px);display:grid;place-items:center;
-      background:linear-gradient(180deg, #0f3aad 0%, #1e40af 100%);border-radius:20px;margin-top:12px
+      position:relative;min-height:calc(100vh - 72px);
+      background:linear-gradient(180deg, #0f3aad 0%, #1e40af 100%);
+      border-radius:20px;margin-top:12px
     }
+    /* home layout when active */
+    #view-home.section.active{ display:grid; place-items:center; }
     .hero-text{text-align:center;line-height:0.9;font-weight:900;letter-spacing:1px;font-size:clamp(56px, 16vw, 160px);color:#eaf2ff;text-shadow:0 6px 24px rgba(0,0,0,.35)}
     .hero-text span{display:block}
     .hero-sub{margin-top:12px;color:#dbeafe;font-weight:600;letter-spacing:.5px;text-align:center}
@@ -84,10 +91,6 @@
     .table{width:100%;border-collapse:collapse}
     .table th,.table td{border-bottom:1px solid #223055;padding:8px 10px;text-align:left}
     .table th{color:#cbd5e1;font-weight:700}
-
-    /* Sections are hidden until chosen from the menu */
-    .section{display:none}
-    .section.active{display:block}
 
     /* Mobile tweaks */
     @media (max-width:720px){
@@ -242,7 +245,7 @@
 
   <!-- Update / SW bootstrap -->
   <script>
-    const APP_VERSION = '2025.08.29.navfix-v3'; // bump on each deploy
+    const APP_VERSION = '2025.08.29.viewfix-v1'; // bump on each deploy
 
     async function hardUpdate(reason='manual'){
       try{
@@ -404,7 +407,7 @@
       closeDrawer();
     }
 
-    // Wire menu buttons (now that backdrop layering is correct, clicks land)
+    // Wire menu buttons
     document.querySelectorAll('.panel .navbtn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         if (btn.id === 'checkUpdateBtn'){ hardUpdate('manual'); return; }
@@ -634,7 +637,7 @@
     if (myTeamName) { const el=document.getElementById('teamName'); if (el) el.value=myTeamName; }
     (function initAdmin(){ const b=document.getElementById('adminBtn'); if (b) b.textContent = adminEnabled ? '✅ Admin ON' : '🔒 Admin mode'; })();
     updateBudget();
-    switchView('home'); // start on Home
+    switchView('home'); // start on Home; menu switches views fully now
   </script>
 </body>
 </html>
