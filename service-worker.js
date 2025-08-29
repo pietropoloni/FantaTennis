@@ -1,5 +1,5 @@
 /* FantaTennis PWA — simple offline cache */
-const CACHE_NAME = 'ft-cache-v1';
+const CACHE_NAME = 'ft-cache-v2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -56,3 +56,4 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
+
