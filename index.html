@@ -81,7 +81,7 @@
         <button id="clearBtn">✕ Clear selections</button>
         <button id="copyBtn">⧉ Copy picks</button>
         <div style="margin-left:auto;font-weight:700">
-          Budget left: <span id="budget">200M</span>
+          Budget left: <span id="budget">900M</span>
         </div>
       </div>
       <div class="controls" style="margin-top:8px">
@@ -101,7 +101,7 @@
 
   <main class="wrap">
     <h2 style="margin-top:16px">My Picks</h2>
-    <div id="selected" class="grid"></div>
+    <div id="selected" class="grid" aria-live="polite"></div>
 
     <div id="status" class="sub" role="status" aria-live="polite"></div>
     <div id="grid" class="grid" aria-live="polite" aria-busy="true"></div>
@@ -229,10 +229,12 @@
     // --- State ---
     const STORAGE_KEY_PICKS = 'ft.picks.v1';
     const MAX_PER_BAND = 3;
-    const MAX_BUDGET = 200_000_000;
+    const MAX_BUDGET = 900_000_000; // 900M total budget
+
     let budget = MAX_BUDGET;
     const picks = JSON.parse(localStorage.getItem(STORAGE_KEY_PICKS) || '{"A":[],"B":[],"C":[],"D":[]}');
 
+    // --- Elements ---
     const $grid = document.getElementById('grid');
     const $status = document.getElementById('status');
     const $toast = document.getElementById('toast');
@@ -240,51 +242,42 @@
     const $cntB = document.getElementById('cntB');
     const $cntC = document.getElementById('cntC');
     const $cntD = document.getElementById('cntD');
+    const $bandFilter = document.getElementById('bandFilter');
+    const $budget = document.getElementById('budget');
 
+    // --- Utils ---
     function bandFor(rank){
       if (rank>=1 && rank<=10) return 'A';
       if (rank>=11 && rank<=30) return 'B';
       if (rank>=31 && rank<=50) return 'C';
       return 'D';
     }
-
-    function costFor(rank){
-      return (101 - rank) * 1_000_000;
+    function costFor(rank){ return (101 - rank) * 1_000_000; }
+    function formatM(n){ return (n/1_000_000) + 'M'; }
+    function escapeHTML(s){
+      return s.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
     }
-
     function showToast(msg){
       $toast.textContent = msg;
       $toast.classList.remove('hide');
       clearTimeout(showToast._t);
       showToast._t = setTimeout(()=> $toast.classList.add('hide'), 3000);
     }
-
-    function updateBudget(){
-      const spent = Object.values(picks).flat()
-        .map(id => parseInt(id.split('|')[0]))
+    function isSelected(id){
+      // check across all bands
+      return Object.values(picks).some(arr => arr.includes(id));
+    }
+    function calcSpent(){
+      return Object.values(picks).flat()
+        .map(id => parseInt(id.split('|')[0],10))
         .map(costFor)
         .reduce((a,b)=>a+b, 0);
+    }
+    function updateBudget(){
+      const spent = calcSpent();
       budget = MAX_BUDGET - spent;
-      document.getElementById('budget').textContent = `${budget/1_000_000}M`;
+      $budget.textContent = formatM(budget);
     }
-
-    function renderSelected(){
-      const $sel = document.getElementById('selected');
-      $sel.innerHTML = '';
-      const allSel = Object.values(picks).flat();
-      for (const id of allSel){
-        const [rank,name] = id.split('|');
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <div class="rank">${rank}</div>
-          <div class="name">${name}</div>
-          <div class="meta">Cost ${costFor(parseInt(rank))/1_000_000}M</div>
-        `;
-        $sel.appendChild(card);
-      }
-    }
-
     function updateCounters(){
       $cntA.textContent = `${picks.A.length}/${MAX_PER_BAND}`;
       $cntB.textContent = `${picks.B.length}/${MAX_PER_BAND}`;
@@ -293,15 +286,179 @@
       localStorage.setItem(STORAGE_KEY_PICKS, JSON.stringify(picks));
       updateBudget();
       renderSelected();
+      updateStatus();
+    }
+    function currentFilteredPlayers(){
+      const v = $bandFilter.value;
+      if (v === 'all') return PLAYERS;
+      return PLAYERS.filter(p => bandFor(p.rank) === v);
+    }
+
+    // --- Renderers ---
+    function renderSelected(){
+      const $sel = document.getElementById('selected');
+      $sel.innerHTML = '';
+      const allSel = Object.values(picks).flat();
+      if (allSel.length === 0){
+        const empty = document.createElement('div');
+        empty.className = 'sub';
+        empty.textContent = 'No picks yet. Click players below to add them to your squad.';
+        $sel.appendChild(empty);
+        return;
+      }
+      // Sort by rank asc
+      const data = allSel.map(id => {
+        const [rankStr, name] = id.split('|');
+        const rank = parseInt(rankStr,10);
+        return {rank, name};
+      }).sort((a,b)=>a.rank-b.rank);
+
+      for (const p of data){
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="rank">${p.rank}</div>
+          <div style="flex:1;min-width:0">
+            <div class="name">${escapeHTML(p.name)}</div>
+            <div class="meta">Cost ${formatM(costFor(p.rank))} • Band ${bandFor(p.rank)}</div>
+          </div>
+        `;
+        $sel.appendChild(card);
+      }
     }
 
     function render(players){
-      $grid.setAttribute('aria-busy','false');
+      $grid.setAttribute('aria-busy','true');
       $grid.innerHTML = '';
       for (const p of players){
         const band = bandFor(p.rank);
         const id = `${p.rank}|${p.name}`;
+        const selected = isSelected(id);
+
         const card = document.createElement('button');
-        card.className = 'card';
+        card.type = 'button';
+        card.className = 'card' + (selected ? ' sel' : '');
         card.setAttribute('data-id', id);
-        card
+        card.setAttribute('data-band', band);
+        card.setAttribute('data-rank', String(p.rank));
+        card.setAttribute('aria-pressed', selected ? 'true' : 'false');
+        card.title = selected ? 'Click to remove from picks' : 'Click to add to picks';
+
+        card.innerHTML = `
+          <div class="rank">${p.rank}</div>
+          <div style="flex:1;min-width:0">
+            <div class="name">${escapeHTML(p.name)}</div>
+            <div class="meta">Cost ${formatM(costFor(p.rank))}</div>
+          </div>
+          <div class="tag ${band}" aria-hidden="true">${band}</div>
+        `;
+        $grid.appendChild(card);
+      }
+      $grid.setAttribute('aria-busy','false');
+      updateStatus();
+    }
+
+    function updateStatus(){
+      const v = $bandFilter.value;
+      const map = {all:'All', A:'Band A (1–10)', B:'Band B (11–30)', C:'Band C (31–50)', D:'Band D (51–100)'};
+      const showing = currentFilteredPlayers().length;
+      $status.textContent = `Showing ${showing} players • Filter: ${map[v]} • Budget left: ${formatM(budget)}. Click a player to add/remove (max ${MAX_PER_BAND} per band).`;
+    }
+
+    function renderFiltered(){
+      render(currentFilteredPlayers());
+    }
+
+    // --- Interactions ---
+    $bandFilter.addEventListener('change', () => {
+      renderFiltered();
+    });
+
+    $grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('button.card');
+      if (!btn) return;
+
+      const id = btn.getAttribute('data-id');
+      const band = btn.getAttribute('data-band');
+      const rank = parseInt(btn.getAttribute('data-rank'),10);
+      const cost = costFor(rank);
+
+      // Toggle selection
+      if (isSelected(id)){
+        // remove
+        picks[band] = picks[band].filter(x => x !== id);
+        showToast('Removed from picks.');
+      } else {
+        // add with validations
+        if (picks[band].length >= MAX_PER_BAND){
+          showToast(`Band ${band} is full (max ${MAX_PER_BAND}).`);
+          return;
+        }
+        if (budget - cost < 0){
+          showToast('Not enough budget for this player.');
+          return;
+        }
+        picks[band].push(id);
+        showToast('Added to picks!');
+      }
+      updateCounters();
+      renderFiltered(); // keep the same view and refresh selection states
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      if (!Object.values(picks).some(arr => arr.length)) return;
+      picks.A = []; picks.B = []; picks.C = []; picks.D = [];
+      updateCounters();
+      renderFiltered();
+      showToast('All selections cleared.');
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      const spent = calcSpent();
+      const left = MAX_BUDGET - spent;
+
+      function lineFor(band){
+        const label = {A:'A (1–10)',B:'B (11–30)',C:'C (31–50)',D:'D (51–100)'}[band];
+        if (!picks[band].length) return `${label}: —`;
+        const parts = picks[band]
+          .map(id => {
+            const [r, n] = id.split('|');
+            return `${r} ${n} (${formatM(costFor(parseInt(r,10)))})`;
+          })
+          .join(', ');
+        return `${label}: ${parts}`;
+      }
+
+      const text = [
+        'FantaTennis — My Picks (ATP snapshot Aug 25, 2025)',
+        lineFor('A'),
+        lineFor('B'),
+        lineFor('C'),
+        lineFor('D'),
+        `Total spent: ${formatM(spent)}`,
+        `Budget left: ${formatM(left)}`
+      ].join('\n');
+
+      try{
+        await navigator.clipboard.writeText(text);
+        showToast('Picks copied to clipboard.');
+      }catch(err){
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try{ document.execCommand('copy'); showToast('Picks copied to clipboard.'); }
+        catch{ showToast('Copy failed. You can select & copy manually.'); }
+        finally{ document.body.removeChild(ta); }
+      }
+    });
+
+    // --- Initial render ---
+    // Ensure budget label starts at the correct value
+    $budget.textContent = formatM(budget);
+    updateCounters();    // sets counters, budget, selected section, status
+    renderFiltered();    // paints the grid according to current filter ("All" by default)
+  </script>
+</body>
+</html>
