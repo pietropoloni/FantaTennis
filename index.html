@@ -15,7 +15,7 @@
       --b:#3b82f6; /* blue B: ranks 11–30 */
       --c:#10b981; /* green C: ranks 31–50 */
       --d:#f59e0b; /* yellow D: ranks 51–100 */
-      --ok:#22c55e; --warn:#f97316; --ring:#334155;
+      --ok:#22c55e; --ring:#334155;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0a0f1f 0%, #0f1731 100%);color:var(--text)}
@@ -59,11 +59,8 @@
     }
     .hide{display:none}
     .footer{color:var(--muted);font-size:.85rem;margin:20px 0 40px}
-    .bad{color:#fca5a5}
-    .good{color:var(--ok)}
     .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
     .bandCount{font-weight:700}
-    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
     a.link{color:#93c5fd;text-decoration:none;border-bottom:1px dotted #93c5fd}
     a.link:hover{border-bottom-style:solid}
     code{background:#0c132b;padding:2px 6px;border:1px solid #26325a;border-radius:6px}
@@ -73,7 +70,7 @@
   <header>
     <div class="wrap">
       <h1>FantaTennis</h1>
-      <div class="sub">Pick up to <b>3 players per band</b> from the official ATP Top 100.
+      <div class="sub">Pick up to <b>3 players per band</b> from the official ATP Top 100 (static list as of Aug 25, 2025).
         <span class="legend">
           <span class="pill"><span class="dot" style="background:var(--a)"></span> A (1–10) <span id="cntA" class="bandCount">0/3</span></span>
           <span class="pill"><span class="dot" style="background:var(--b)"></span> B (11–30) <span id="cntB" class="bandCount">0/3</span></span>
@@ -82,7 +79,7 @@
         </span>
       </div>
       <div class="controls">
-        <button id="refreshBtn" title="Fetch latest ATP rankings">↻ Refresh rankings</button>
+        <button id="refreshBtn" title="Static list" disabled>↻ Static rankings</button>
         <button id="clearBtn" title="Clear all selections">✕ Clear selections</button>
         <button id="copyBtn" title="Copy your picks">⧉ Copy picks</button>
       </div>
@@ -93,8 +90,8 @@
     <div id="status" class="sub" role="status" aria-live="polite"></div>
     <div id="grid" class="grid" aria-live="polite" aria-busy="true"></div>
     <div class="footer">
-      <p>Source: <a class="link" href="https://www.atptour.com/en/rankings/singles" target="_blank" rel="noopener">ATP Tour — Singles Rankings</a>.</p>
-      <p class="sub">Bands are non-overlapping: A (1–10), B (11–30), C (31–50), D (51–100). Data is cached for offline use.</p>
+      <p>Source: ATP Tour — Singles Rankings (numerical PDF). Snapshot date: <b>Aug 25, 2025</b>.</p>
+      <p class="sub">Bands are non-overlapping: A (1–10), B (11–30), C (31–50), D (51–100). Selections are stored locally and work offline.</p>
     </div>
   </main>
 
@@ -108,9 +105,112 @@
       });
     }
 
-    // --- Data + state ---
-    const STORAGE_KEY_PLAYERS = 'ft.players.v2'; // bumped to avoid stale cache
-    const STORAGE_KEY_PICKS   = 'ft.picks.v1';
+    // ---- Static Top 100 (ATP Singles — as of Aug 25, 2025) ----
+    const PLAYERS = [
+      {rank:1, name:"Jannik Sinner"},
+      {rank:2, name:"Carlos Alcaraz"},
+      {rank:3, name:"Alexander Zverev"},
+      {rank:4, name:"Taylor Fritz"},
+      {rank:5, name:"Jack Draper"},
+      {rank:6, name:"Ben Shelton"},
+      {rank:7, name:"Novak Djokovic"},
+      {rank:8, name:"Alex de Minaur"},
+      {rank:9, name:"Karen Khachanov"},
+      {rank:10, name:"Lorenzo Musetti"},
+      {rank:11, name:"Holger Rune"},
+      {rank:12, name:"Casper Ruud"},
+      {rank:13, name:"Daniil Medvedev"},
+      {rank:14, name:"Tommy Paul"},
+      {rank:15, name:"Andrey Rublev"},
+      {rank:16, name:"Jakub Mensik"},
+      {rank:17, name:"Frances Tiafoe"},
+      {rank:18, name:"Alejandro Davidovich Fokina"},
+      {rank:19, name:"Francisco Cerundolo"},
+      {rank:20, name:"Arthur Fils"},
+      {rank:21, name:"Jiri Lehecka"},
+      {rank:22, name:"Tomas Machac"},
+      {rank:23, name:"Ugo Humbert"},
+      {rank:24, name:"Alexander Bublik"},
+      {rank:25, name:"Grigor Dimitrov"},
+      {rank:26, name:"Flavio Cobolli"},
+      {rank:27, name:"Felix Auger-Aliassime"},
+      {rank:28, name:"Stefanos Tsitsipas"},
+      {rank:29, name:"Denis Shapovalov"},
+      {rank:30, name:"Tallon Griekspoor"},
+      {rank:31, name:"Brandon Nakashima"},
+      {rank:32, name:"Alex Michelsen"},
+      {rank:33, name:"Gabriel Diallo"},
+      {rank:34, name:"Luciano Darderi"},
+      {rank:35, name:"Cameron Norrie"},
+      {rank:36, name:"Alexei Popyrin"},
+      {rank:37, name:"Giovanni Mpetshi Perricard"},
+      {rank:38, name:"Alexandre Muller"},
+      {rank:39, name:"Sebastian Baez"},
+      {rank:40, name:"Corentin Moutet"},
+      {rank:41, name:"Nuno Borges"},
+      {rank:42, name:"Miomir Kecmanovic"},
+      {rank:43, name:"Camilo Ugo Carabelli"},
+      {rank:44, name:"Jaume Munar"},
+      {rank:45, name:"Joao Fonseca"},
+      {rank:46, name:"Lorenzo Sonego"},
+      {rank:47, name:"Roberto Bautista Agut"},
+      {rank:48, name:"Zizou Bergs"},
+      {rank:49, name:"Gael Monfils"},
+      {rank:50, name:"Learner Tien"},
+      {rank:51, name:"Benjamin Bonzi"},
+      {rank:52, name:"Matteo Berrettini"},
+      {rank:53, name:"Fabian Marozsan"},
+      {rank:54, name:"Francisco Comesana"},
+      {rank:55, name:"Marcos Giron"},
+      {rank:56, name:"Daniel Altmaier"},
+      {rank:57, name:"Hamad Medjedovic"},
+      {rank:58, name:"Jordan Thompson"},
+      {rank:59, name:"Tomas Martin Etcheverry"},
+      {rank:60, name:"Jacob Fearnley"},
+      {rank:61, name:"Damir Dzumhur"},
+      {rank:62, name:"Marin Cilic"},
+      {rank:63, name:"Marton Fucsovics"},
+      {rank:64, name:"Matteo Arnaldi"},
+      {rank:65, name:"Mattia Bellucci"},
+      {rank:66, name:"Pedro Martinez"},
+      {rank:67, name:"Reilly Opelka"},
+      {rank:68, name:"Hubert Hurkacz"},
+      {rank:69, name:"Terence Atmane"},
+      {rank:70, name:"Quentin Halys"},
+      {rank:71, name:"Aleksandar Kovacevic"},
+      {rank:72, name:"Laslo Djere"},
+      {rank:73, name:"Botic van de Zandschulp"},
+      {rank:74, name:"Yunchaokete Bu"},
+      {rank:75, name:"Sebastian Korda"},
+      {rank:76, name:"Kamil Majchrzak"},
+      {rank:77, name:"Adrian Mannarino"},
+      {rank:78, name:"Mariano Navone"},
+      {rank:79, name:"Arthur Cazaux"},
+      {rank:80, name:"David Goffin"},
+      {rank:81, name:"Christopher O'Connell"},
+      {rank:82, name:"Arthur Rinderknech"},
+      {rank:83, name:"Jesper de Jong"},
+      {rank:84, name:"Ethan Quinn"},
+      {rank:85, name:"Adam Walton"},
+      {rank:86, name:"Luca Nardi"},
+      {rank:87, name:"Roberto Carballes Baena"},
+      {rank:88, name:"Juan Manuel Cerundolo"},
+      {rank:89, name:"Vit Kopriva"},
+      {rank:90, name:"Kei Nishikori"},
+      {rank:91, name:"Alexander Shevchenko"},
+      {rank:92, name:"Jenson Brooksby"},
+      {rank:93, name:"Filip Misolic"},
+      {rank:94, name:"Roman Safiullin"},
+      {rank:95, name:"Aleksandar Vukic"},
+      {rank:96, name:"Tristan Schoolkate"},
+      {rank:97, name:"Dalibor Svrcina"},
+      {rank:98, name:"Valentin Royer"},
+      {rank:99, name:"Carlos Taberner"},
+      {rank:100, name:"Mackenzie McDonald"}
+    ];
+
+    // --- State ---
+    const STORAGE_KEY_PICKS = 'ft.picks.v1';
     const MAX_PER_BAND = 3;
     const picks = JSON.parse(localStorage.getItem(STORAGE_KEY_PICKS) || '{"A":[],"B":[],"C":[],"D":[]}');
 
@@ -122,15 +222,6 @@
     const $cntC = document.getElementById('cntC');
     const $cntD = document.getElementById('cntD');
 
-    // --- Use AllOrigins to bypass CORS reliably ---
-    const RAW = (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`;
-    const SOURCES = [
-      RAW('https://www.atptour.com/en/rankings/singles'),
-      RAW('https://www.espn.com/tennis/rankings'),
-      RAW('https://live-tennis.eu/en/official-atp-ranking'),
-      RAW('https://tennisstats.com/rankings/atp')
-    ];
-
     function bandFor(rank){
       if (rank>=1 && rank<=10) return 'A';
       if (rank>=11 && rank<=30) return 'B';
@@ -138,13 +229,11 @@
       return 'D'; // 51–100
     }
 
-    function showToast(msg, tone=''){
+    function showToast(msg){
       $toast.textContent = msg;
       $toast.classList.remove('hide');
-      if (tone==='bad') {$toast.style.borderColor="#7f1d1d"; $toast.style.color="#fecaca";}
-      else {$toast.style.borderColor="#2a3665"; $toast.style.color="#e5e7eb";}
       clearTimeout(showToast._t);
-      showToast._t = setTimeout(()=> $toast.classList.add('hide'), 3200);
+      showToast._t = setTimeout(()=> $toast.classList.add('hide'), 3000);
     }
 
     function updateCounters(){
@@ -155,41 +244,32 @@
       localStorage.setItem(STORAGE_KEY_PICKS, JSON.stringify(picks));
     }
 
-    function savePlayers(players){
-      localStorage.setItem(STORAGE_KEY_PLAYERS, JSON.stringify({ts:Date.now(), players}));
-    }
-    function loadCachedPlayers(){
-      try{
-        const cached = JSON.parse(localStorage.getItem(STORAGE_KEY_PLAYERS) || 'null');
-        return cached?.players || null;
-      }catch{ return null; }
-    }
-
     function render(players){
       $grid.setAttribute('aria-busy','false');
       $grid.innerHTML = '';
       for (const p of players){
+        const band = bandFor(p.rank);
+        const id = `${p.rank}|${p.name}`;
         const card = document.createElement('button');
         card.className = 'card';
-        card.setAttribute('data-id', p.rank + '|' + p.name);
-        card.setAttribute('data-band', p.band);
+        card.setAttribute('data-id', id);
+        card.setAttribute('data-band', band);
         card.setAttribute('aria-pressed', 'false');
-        card.title = `Select ${p.name} (${p.band})`;
+        card.title = `Select ${p.name} (${band})`;
 
-        const picked = picks[p.band].includes(card.dataset.id);
+        const picked = picks[band].includes(id);
         if (picked) { card.classList.add('sel'); card.setAttribute('aria-pressed','true'); }
 
         card.innerHTML = `
           <div class="rank">${p.rank}</div>
           <div style="display:flex;flex-direction:column;gap:2px">
             <div class="name">${p.name}</div>
-            <div class="meta">Band ${p.band}</div>
+            <div class="meta">Band ${band}</div>
           </div>
-          <div class="tag ${p.band}" aria-hidden="true">${p.band}</div>
+          <div class="tag ${band}" aria-hidden="true">${band}</div>
         `;
 
         card.addEventListener('click', () => {
-          const id = card.dataset.id;
           const b = card.dataset.band;
           const list = picks[b];
 
@@ -199,7 +279,7 @@
             card.setAttribute('aria-pressed','false');
           } else {
             if (list.length >= MAX_PER_BAND) {
-              showToast(`Max ${MAX_PER_BAND} picks allowed in band ${b}.`, 'bad');
+              showToast(`Max ${MAX_PER_BAND} picks allowed in band ${b}.`);
               return;
             }
             list.push(id);
@@ -212,91 +292,10 @@
         $grid.appendChild(card);
       }
       updateCounters();
-    }
-
-    // --- Parsing helpers (more tolerant) ---
-    function normalizeName(s){
-      return s.replace(/\s+/g,' ').replace(/\(.*?\)/g,'').trim();
-    }
-    function isLikelyName(s){
-      const bad = /(ATP|Staff|News|Profile|Header|Download|App|Schedule|Draw|Partner|Race|Doubles|Live|Rankings|Subscribe|Cookie)/i;
-      return !bad.test(s) && s.split(' ').length <= 4 && s.length >= 3;
-    }
-
-    function parseTop100FromText(txt){
-      let out = [];
-      let m;
-
-      // Pattern A: "rank  Name Name  age  points"
-      let re1 = /^(\d{1,3})\s+([A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]+?)\s+\d{1,2}\s+[\d,\.]{2,}/gm;
-      while ((m = re1.exec(txt)) !== null) {
-        const rank = parseInt(m[1],10);
-        const name = normalizeName(m[2]);
-        if (rank>=1 && rank<=100 && isLikelyName(name)) out.push({rank, name});
-      }
-
-      // Pattern B: "rank  Name Name  points" (no age)
-      if (out.length < 80){
-        let re2 = /^(\d{1,3})\s+([A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]+?)(?:\s+\([A-Z]{3}\))?\s+[\d,\.]{2,}\b/gm;
-        while ((m = re2.exec(txt)) !== null) {
-          const rank = parseInt(m[1],10);
-          const name = normalizeName(m[2]);
-          if (rank>=1 && rank<=100 && isLikelyName(name)) out.push({rank, name});
-        }
-      }
-
-      // Pattern C (HTML tables): ...<td>rank</td>...<td>name</td>...
-      if (out.length < 80){
-        let re3 = />(\d{1,3})<\/td>\s*<td[^>]*>(?:<a[^>]*>)?([A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]+?)(?:<\/a>)?<\/td>/gmi;
-        while ((m = re3.exec(txt)) !== null) {
-          const rank = parseInt(m[1],10);
-          const name = normalizeName(m[2]);
-          if (rank>=1 && rank<=100 && isLikelyName(name)) out.push({rank, name});
-        }
-      }
-
-      // Deduplicate by rank, sort, band
-      const byRank = new Map();
-      for (const p of out) if (!byRank.has(p.rank)) byRank.set(p.rank, p);
-      out = Array.from(byRank.values()).sort((a,b)=>a.rank-b.rank).slice(0,100);
-      return out.map(p => ({...p, band: bandFor(p.rank)}));
-    }
-
-    async function fetchTop100(){
-      $status.textContent = 'Loading rankings…';
-      $grid.setAttribute('aria-busy','true');
-
-      for (const url of SOURCES){
-        try{
-          const res = await fetch(url, {cache:'no-store'}); // avoid stale proxy cache
-          if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
-          const txt = await res.text();
-          const players = parseTop100FromText(txt);
-          if (players.length >= 80) { // good enough (usually 100)
-            savePlayers(players);
-            $status.innerHTML = `Loaded ${players.length} players from <code>${new URL(url).hostname}</code>.`;
-            render(players);
-            return players;
-          }
-        }catch(e){
-          console.warn('Fetch/parsing failed for', url, e);
-        }
-      }
-
-      const cached = loadCachedPlayers();
-      if (cached?.length) {
-        $status.innerHTML = `<span class="bad">Couldn’t refresh.</span> Showing cached rankings from last session.`;
-        render(cached);
-        return cached;
-      } else {
-        $status.innerHTML = `<span class="bad">Couldn’t load rankings.</span> Check network/AdBlock and try Refresh (↻).`;
-        $grid.innerHTML = '';
-        return [];
-      }
+      $status.innerHTML = `Loaded <code>${players.length}</code> players (static).`;
     }
 
     // --- Controls ---
-    document.getElementById('refreshBtn').addEventListener('click', () => fetchTop100());
     document.getElementById('clearBtn').addEventListener('click', () => {
       picks.A = []; picks.B = []; picks.C = []; picks.D = [];
       updateCounters();
@@ -306,14 +305,12 @@
     document.getElementById('copyBtn').addEventListener('click', async () => {
       const selections = Object.fromEntries(['A','B','C','D'].map(b => [b, picks[b].map(id => id.split('|')[1])]));
       const txt = `My FantaTennis picks:\nA: ${selections.A.join(', ') || '-'}\nB: ${selections.B.join(', ') || '-'}\nC: ${selections.C.join(', ') || '-'}\nD: ${selections.D.join(', ') || '-'}`;
-      try { await navigator.clipboard.writeText(txt); showToast('Picks copied to clipboard!', 'good'); }
-      catch { showToast('Copy failed. You can select & copy manually.', 'bad'); }
+      try { await navigator.clipboard.writeText(txt); showToast('Picks copied to clipboard!'); }
+      catch { showToast('Copy failed. You can select & copy manually.'); }
     });
 
-    // --- Boot: show cached immediately (if any), then refresh ---
-    const bootCached = loadCachedPlayers();
-    if (bootCached?.length){ render(bootCached); $status.textContent = 'Showing cached rankings. Refreshing…'; }
-    fetchTop100();
+    // --- Boot ---
+    render(PLAYERS);
   </script>
 </body>
 </html>
