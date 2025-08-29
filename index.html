@@ -11,10 +11,7 @@
   <style>
     :root{
       --bg:#0b1020; --card:#111834; --text:#e5e7eb; --muted:#9aa4b2;
-      --a:#ef4444; /* red A: ranks 1–10 */
-      --b:#3b82f6; /* blue B: ranks 11–30 */
-      --c:#10b981; /* green C: ranks 31–50 */
-      --d:#f59e0b; /* yellow D: ranks 51–100 */
+      --a:#ef4444; --b:#3b82f6; --c:#10b981; --d:#f59e0b;
       --ok:#22c55e; --ring:#334155;
     }
     *{box-sizing:border-box}
@@ -23,13 +20,14 @@
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
     h1{margin:4px 0 6px;font-size:1.5rem;letter-spacing:.2px}
     .sub{color:var(--muted);font-size:.9rem}
-    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
     button{
       background:#1b2344;color:#e5e7eb;border:1px solid #2a3665;border-radius:12px;
       padding:10px 14px;font-weight:600;cursor:pointer;transition:.2s;box-shadow:0 1px 0 #000 inset
     }
     button:hover{transform:translateY(-1px);background:#1f2a55}
     button:disabled{opacity:.55;cursor:not-allowed}
+    select{padding:6px 10px;border-radius:8px;background:#1b2344;color:#e5e7eb;border:1px solid #2a3665}
     .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--ring);border-radius:999px;background:#0c132b}
     .dot{width:10px;height:10px;border-radius:999px}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin:16px 0 28px}
@@ -79,16 +77,35 @@
         </span>
       </div>
       <div class="controls">
-        <button id="refreshBtn" title="Static list" disabled>↻ Static rankings</button>
-        <button id="clearBtn" title="Clear all selections">✕ Clear selections</button>
-        <button id="copyBtn" title="Copy your picks">⧉ Copy picks</button>
+        <button id="refreshBtn" disabled>↻ Static rankings</button>
+        <button id="clearBtn">✕ Clear selections</button>
+        <button id="copyBtn">⧉ Copy picks</button>
+        <div style="margin-left:auto;font-weight:700">
+          Budget left: <span id="budget">200M</span>
+        </div>
+      </div>
+      <div class="controls" style="margin-top:8px">
+        <label>
+          Filter band:
+          <select id="bandFilter">
+            <option value="all">All</option>
+            <option value="A">Band A (1–10)</option>
+            <option value="B">Band B (11–30)</option>
+            <option value="C">Band C (31–50)</option>
+            <option value="D">Band D (51–100)</option>
+          </select>
+        </label>
       </div>
     </div>
   </header>
 
   <main class="wrap">
+    <h2 style="margin-top:16px">My Picks</h2>
+    <div id="selected" class="grid"></div>
+
     <div id="status" class="sub" role="status" aria-live="polite"></div>
     <div id="grid" class="grid" aria-live="polite" aria-busy="true"></div>
+
     <div class="footer">
       <p>Source: ATP Tour — Singles Rankings (numerical PDF). Snapshot date: <b>Aug 25, 2025</b>.</p>
       <p class="sub">Bands are non-overlapping: A (1–10), B (11–30), C (31–50), D (51–100). Selections are stored locally and work offline.</p>
@@ -212,6 +229,8 @@
     // --- State ---
     const STORAGE_KEY_PICKS = 'ft.picks.v1';
     const MAX_PER_BAND = 3;
+    const MAX_BUDGET = 200_000_000;
+    let budget = MAX_BUDGET;
     const picks = JSON.parse(localStorage.getItem(STORAGE_KEY_PICKS) || '{"A":[],"B":[],"C":[],"D":[]}');
 
     const $grid = document.getElementById('grid');
@@ -226,7 +245,11 @@
       if (rank>=1 && rank<=10) return 'A';
       if (rank>=11 && rank<=30) return 'B';
       if (rank>=31 && rank<=50) return 'C';
-      return 'D'; // 51–100
+      return 'D';
+    }
+
+    function costFor(rank){
+      return (101 - rank) * 1_000_000;
     }
 
     function showToast(msg){
@@ -236,12 +259,40 @@
       showToast._t = setTimeout(()=> $toast.classList.add('hide'), 3000);
     }
 
+    function updateBudget(){
+      const spent = Object.values(picks).flat()
+        .map(id => parseInt(id.split('|')[0]))
+        .map(costFor)
+        .reduce((a,b)=>a+b, 0);
+      budget = MAX_BUDGET - spent;
+      document.getElementById('budget').textContent = `${budget/1_000_000}M`;
+    }
+
+    function renderSelected(){
+      const $sel = document.getElementById('selected');
+      $sel.innerHTML = '';
+      const allSel = Object.values(picks).flat();
+      for (const id of allSel){
+        const [rank,name] = id.split('|');
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="rank">${rank}</div>
+          <div class="name">${name}</div>
+          <div class="meta">Cost ${costFor(parseInt(rank))/1_000_000}M</div>
+        `;
+        $sel.appendChild(card);
+      }
+    }
+
     function updateCounters(){
       $cntA.textContent = `${picks.A.length}/${MAX_PER_BAND}`;
       $cntB.textContent = `${picks.B.length}/${MAX_PER_BAND}`;
       $cntC.textContent = `${picks.C.length}/${MAX_PER_BAND}`;
       $cntD.textContent = `${picks.D.length}/${MAX_PER_BAND}`;
       localStorage.setItem(STORAGE_KEY_PICKS, JSON.stringify(picks));
+      updateBudget();
+      renderSelected();
     }
 
     function render(players){
@@ -253,64 +304,4 @@
         const card = document.createElement('button');
         card.className = 'card';
         card.setAttribute('data-id', id);
-        card.setAttribute('data-band', band);
-        card.setAttribute('aria-pressed', 'false');
-        card.title = `Select ${p.name} (${band})`;
-
-        const picked = picks[band].includes(id);
-        if (picked) { card.classList.add('sel'); card.setAttribute('aria-pressed','true'); }
-
-        card.innerHTML = `
-          <div class="rank">${p.rank}</div>
-          <div style="display:flex;flex-direction:column;gap:2px">
-            <div class="name">${p.name}</div>
-            <div class="meta">Band ${band}</div>
-          </div>
-          <div class="tag ${band}" aria-hidden="true">${band}</div>
-        `;
-
-        card.addEventListener('click', () => {
-          const b = card.dataset.band;
-          const list = picks[b];
-
-          if (card.classList.contains('sel')) {
-            picks[b] = list.filter(x => x !== id);
-            card.classList.remove('sel');
-            card.setAttribute('aria-pressed','false');
-          } else {
-            if (list.length >= MAX_PER_BAND) {
-              showToast(`Max ${MAX_PER_BAND} picks allowed in band ${b}.`);
-              return;
-            }
-            list.push(id);
-            card.classList.add('sel');
-            card.setAttribute('aria-pressed','true');
-          }
-          updateCounters();
-        });
-
-        $grid.appendChild(card);
-      }
-      updateCounters();
-      $status.innerHTML = `Loaded <code>${players.length}</code> players (static).`;
-    }
-
-    // --- Controls ---
-    document.getElementById('clearBtn').addEventListener('click', () => {
-      picks.A = []; picks.B = []; picks.C = []; picks.D = [];
-      updateCounters();
-      document.querySelectorAll('.card.sel').forEach(el => { el.classList.remove('sel'); el.setAttribute('aria-pressed','false'); });
-      showToast('Selections cleared.');
-    });
-    document.getElementById('copyBtn').addEventListener('click', async () => {
-      const selections = Object.fromEntries(['A','B','C','D'].map(b => [b, picks[b].map(id => id.split('|')[1])]));
-      const txt = `My FantaTennis picks:\nA: ${selections.A.join(', ') || '-'}\nB: ${selections.B.join(', ') || '-'}\nC: ${selections.C.join(', ') || '-'}\nD: ${selections.D.join(', ') || '-'}`;
-      try { await navigator.clipboard.writeText(txt); showToast('Picks copied to clipboard!'); }
-      catch { showToast('Copy failed. You can select & copy manually.'); }
-    });
-
-    // --- Boot ---
-    render(PLAYERS);
-  </script>
-</body>
-</html>
+        card
