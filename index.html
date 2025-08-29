@@ -2,29 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FantaTennis App</title>
   <meta name="description" content="Pick your fantasy tennis squad from the ATP Top 100." />
   <meta name="theme-color" content="#0f172a" />
+  <!-- iOS PWA tweaks -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="FantaTennis" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon1-180.png" />
+  <!-- Use this specific icon on iPhone -->
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon1-180.png" />
   <style>
     :root{
       --bg:#0b1020; --card:#111834; --text:#e5e7eb; --muted:#9aa4b2;
       --a:#ef4444; --b:#3b82f6; --c:#10b981; --d:#f59e0b;
       --ok:#22c55e; --ring:#334155; --accent:#7dd3fc;
+      --blueHero:#0f3aad;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0a0f1f 0%, #0f1731 100%);color:var(--text)}
-    header{position:sticky;top:0;background:rgba(11,16,32,0.8);backdrop-filter:blur(10px);border-bottom:1px solid #1f2a44;z-index:5}
-    .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    h1{margin:4px 0 6px;font-size:1.5rem;letter-spacing:.2px}
+    header{
+      position:sticky;top:0;background:rgba(11,16,32,0.85);
+      backdrop-filter:blur(10px);border-bottom:1px solid #1f2a44;z-index:20
+    }
+    .wrap{max-width:1100px;margin:0 auto;padding:12px 16px}
+    h1{margin:0 0 2px;font-size:1.35rem;letter-spacing:.2px}
     h2{margin:18px 0 8px}
     .sub{color:var(--muted);font-size:.9rem}
-    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+
+    /* Top bar */
+    .topbar{display:flex;align-items:center;gap:10px}
+    .brand{font-weight:800;letter-spacing:.6px}
+    .spacer{flex:1}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     button{
       background:#1b2344;color:#e5e7eb;border:1px solid #2a3665;border-radius:12px;
-      padding:10px 14px;font-weight:600;cursor:pointer;transition:.2s;box-shadow:0 1px 0 #000 inset
+      padding:9px 12px;font-weight:600;cursor:pointer;transition:.2s;box-shadow:0 1px 0 #000 inset
     }
     button:hover{transform:translateY(-1px);background:#1f2a55}
     button:disabled{opacity:.55;cursor:not-allowed}
@@ -35,6 +52,8 @@
     textarea{width:100%;min-height:120px;resize:vertical}
     .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--ring);border-radius:999px;background:#0c132b}
     .dot{width:10px;height:10px;border-radius:999px}
+
+    /* Grid + cards */
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin:16px 0 28px}
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     .card{
@@ -59,7 +78,7 @@
     .card.sel{outline:2px solid var(--accent); outline-offset:2px; transform:translateY(-1px)}
     .toast{
       position:fixed;right:14px;bottom:14px;background:#111834;border:1px solid #2a3665;
-      padding:12px 14px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:10;max-width:90vw
+      padding:12px 14px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:100;max-width:90vw
     }
     .hide{display:none}
     .footer{color:var(--muted);font-size:.85rem;margin:20px 0 40px}
@@ -67,29 +86,104 @@
     .bandCount{font-weight:700}
     a.link{color:#93c5fd;text-decoration:none;border-bottom:1px dotted #93c5fd}
     a.link:hover{border-bottom-style:solid}
-    code{background:#0c132b;padding:2px 6px;border:1px solid #26325a;border-radius:6px}
-    .nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
-    .nav button{padding:8px 12px;border-radius:10px}
-    .nav button.active{outline:2px solid var(--accent); background:#203060}
-    .section{display:none}
-    .section.active{display:block}
+    code.kbd{background:#0c132b;padding:2px 6px;border:1px solid #26325a;border-radius:6px}
+
+    /* Top nav (desktop) + Burger (mobile) */
+    .navbar{display:flex;align-items:center;gap:8px;margin-top:8px}
+    .navbtn{padding:8px 12px;border-radius:10px}
+    .navbtn.active{outline:2px solid var(--accent); background:#203060}
+    .hamburger{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:40px;height:40px;border-radius:10px;background:#1b2344;border:1px solid #2a3665
+    }
+    .hamburger:hover{background:#243063}
+
+    /* Drawer */
+    .drawer{position:fixed;inset:0;pointer-events:none;z-index:90}
+    .drawer .panel{
+      position:absolute;left:0;top:0;height:100%;width:260px;background:#0b1020;border-right:1px solid #1d2748;
+      transform:translateX(-100%);transition:transform .2s ease;box-shadow:8px 0 30px rgba(0,0,0,.35);padding:16px
+    }
+    .drawer .backdrop{
+      position:absolute;inset:0;background:rgba(0,0,0,.35);opacity:0;transition:opacity .2s ease
+    }
+    .drawer.open{pointer-events:auto}
+    .drawer.open .panel{transform:translateX(0)}
+    .drawer.open .backdrop{opacity:1}
+
+    /* HERO HOME PAGE */
+    #view-home{
+      position:relative;min-height:calc(100vh - 90px);display:grid;place-items:center;
+      background:linear-gradient(180deg, #0f3aad 0%, #1e40af 100%);
+      border-radius:20px;margin-top:12px
+    }
+    .hero-text{
+      text-align:center;line-height:0.9;
+      font-weight:900;letter-spacing:1px;
+      font-size:clamp(56px, 16vw, 160px);
+      color:#eaf2ff;text-shadow:0 6px 24px rgba(0,0,0,.35)
+    }
+    .hero-text span{display:block}
+    .hero-sub{margin-top:12px;color:#dbeafe;font-weight:600;letter-spacing:.5px}
+
+    /* Tables */
     .table{width:100%;border-collapse:collapse}
     .table th,.table td{border-bottom:1px solid #223055;padding:8px 10px;text-align:left}
     .table th{color:#cbd5e1;font-weight:700}
-    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;background:#0c132b;border:1px solid #26325a;border-radius:6px;padding:2px 6px}
-    /* Hamburger (mobile) */
-    .hamburger{display:none}
+
+    /* Mobile tweaks */
     @media (max-width:720px){
-      .hamburger{display:inline-flex;margin-left:auto}
-      .nav-items{display:none;width:100%;gap:8px}
-      .nav.open .nav-items{display:flex;flex-direction:column}
+      .wrap{padding:12px}
+      .grid{grid-template-columns:1fr}
+      .topbar .controls-right{display:none} /* hide some desktop controls on small screens */
+      .navbar{display:none} /* use drawer on mobile */
+      .brand{font-size:1.1rem}
     }
   </style>
 </head>
 <body>
+  <!-- Left drawer for navigation -->
+  <aside id="drawer" class="drawer" aria-hidden="true">
+    <div class="panel" role="menu" aria-label="Main menu">
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-weight:800">Menu</div>
+        <button id="closeDrawer" class="hamburger" aria-label="Close menu">✕</button>
+      </div>
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:8px">
+        <button class="navbtn navlink" data-view="home">🏠 Home</button>
+        <button class="navbtn navlink" data-view="myteam">🎾 My Team</button>
+        <button class="navbtn navlink" data-view="teams">👥 Teams</button>
+        <button class="navbtn navlink" data-view="leagues">🏆 Leagues</button>
+        <button class="navbtn navlink" data-view="stats">📈 Statistics</button>
+      </div>
+    </div>
+    <div class="backdrop" id="drawerBackdrop" tabindex="-1" aria-hidden="true"></div>
+  </aside>
+
   <header>
     <div class="wrap">
-      <h1>FantaTennis</h1>
+      <div class="topbar">
+        <!-- Burger on top-left -->
+        <button id="openDrawer" class="hamburger" aria-label="Open menu">☰</button>
+
+        <div class="brand">FantaTennis</div>
+        <div class="spacer"></div>
+
+        <!-- Desktop quick nav -->
+        <nav class="navbar" aria-label="Sections">
+          <button class="navbtn navlink active" data-view="home">Home</button>
+          <button class="navbtn navlink" data-view="myteam">My Team</button>
+          <button class="navbtn navlink" data-view="teams">Teams</button>
+          <button class="navbtn navlink" data-view="leagues">Leagues</button>
+          <button class="navbtn navlink" data-view="stats">Statistics</button>
+        </nav>
+
+        <!-- Right side quick actions (hidden on mobile) -->
+        <div class="controls controls-right">
+          <button id="checkUpdateBtn" title="Force update / refresh caches">↻ Check updates</button>
+        </div>
+      </div>
+
       <div class="sub">Pick up to <b>3 players per band</b> from the official ATP Top 100 (static list as of Aug 25, 2025).
         <span class="legend">
           <span class="pill"><span class="dot" style="background:var(--a)"></span> A (1–10) <span id="cntA" class="bandCount">0/3</span></span>
@@ -100,8 +194,7 @@
       </div>
 
       <!-- Global controls -->
-      <div class="controls">
-        <button id="refreshBtn" disabled>↻ Static rankings</button>
+      <div class="controls" style="margin-top:8px">
         <button id="clearBtn">✕ Clear selections</button>
         <button id="copyBtn">⧉ Copy picks</button>
 
@@ -127,23 +220,23 @@
         <div class="pill">Budget left: <span id="budget" style="margin-left:6px;font-weight:700">900M</span></div>
         <button id="adminBtn" class="row">🔒 Admin mode</button>
       </div>
-
-      <!-- Menu -->
-      <nav class="nav" id="nav">
-        <button class="hamburger" id="hamburger">☰ Menu</button>
-        <div class="nav-items" id="navItems">
-          <button data-view="myteam" class="navbtn active">My Team</button>
-          <button data-view="teams" class="navbtn">Teams</button>
-          <button data-view="leagues" class="navbtn">Leagues</button>
-          <button data-view="stats" class="navbtn">Statistics</button>
-        </div>
-      </nav>
     </div>
   </header>
 
   <main class="wrap">
-    <!-- My Team -->
-    <section id="view-myteam" class="section active">
+    <!-- HOME (new landing page, simple blue background with FANTA / TENNIS) -->
+    <section id="view-home" class="section active" aria-label="Home">
+      <div class="hero">
+        <div class="hero-text">
+          <span>FANTA</span>
+          <span>TENNIS</span>
+        </div>
+        <div class="hero-sub">Open the menu ☰ to get started</div>
+      </div>
+    </section>
+
+    <!-- My Team (moved behind menu) -->
+    <section id="view-myteam" class="section" aria-label="My Team">
       <h2 style="margin-top:16px">My Picks</h2>
       <div id="selected" class="grid" aria-live="polite"></div>
 
@@ -157,7 +250,7 @@
     </section>
 
     <!-- Teams -->
-    <section id="view-teams" class="section">
+    <section id="view-teams" class="section" aria-label="Teams">
       <h2>Teams</h2>
       <div class="row" style="margin-bottom:8px">
         <button id="exportTeamsBtn">⤴ Export teams (JSON)</button>
@@ -175,7 +268,7 @@
     </section>
 
     <!-- Leagues -->
-    <section id="view-leagues" class="section">
+    <section id="view-leagues" class="section" aria-label="Leagues">
       <h2>Leagues</h2>
       <div class="row" style="gap:12px;margin-bottom:10px">
         <fieldset class="row" style="gap:8px">
@@ -194,7 +287,7 @@
     </section>
 
     <!-- Statistics -->
-    <section id="view-stats" class="section">
+    <section id="view-stats" class="section" aria-label="Statistics">
       <h2>Leaderboard (Total Points)</h2>
       <table class="table" id="leaderboard">
         <thead><tr><th>#</th><th>Team</th><th>Total Points</th><th>Budget Spent</th></tr></thead>
@@ -204,6 +297,46 @@
   </main>
 
   <div id="toast" class="toast hide" role="alert"></div>
+
+  <script>
+    // ===== VERSIONED UPDATE / SW-CACHE REFRESH =====
+    const APP_VERSION = '2025.08.29-home-v1'; // bump this whenever you deploy new HTML/JS
+
+    async function hardUpdate(reason='manual'){
+      try{
+        // Clear CacheStorage
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+        // Unregister all service workers
+        if ('serviceWorker' in navigator){
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(r => r.unregister()));
+        }
+        localStorage.setItem('ft.appVersion', APP_VERSION);
+        showToast(`Updated (${reason}). Reloading…`);
+      }catch(e){ console.error(e); }
+      setTimeout(()=> location.reload(), 400);
+    }
+
+    (function bootstrapUpdates(){
+      const prev = localStorage.getItem('ft.appVersion');
+      if (prev !== APP_VERSION){
+        // New version detected: clear caches and re-register SW fresh
+        hardUpdate('version change');
+        return;
+      }
+      // Normal SW registration with cache-busting query
+      if ('serviceWorker' in navigator){
+        window.addEventListener('load', async () => {
+          try{
+            const reg = await navigator.serviceWorker.register(`./service-worker.js?v=${encodeURIComponent(APP_VERSION)}`);
+            // periodic check for update
+            setInterval(()=> reg.update().catch(()=>{}), 60*60*1000);
+          }catch(e){ console.warn('SW registration failed', e); }
+        });
+      }
+    })();
+  </script>
 
   <script>
     // ===== CONFIG =====
@@ -291,11 +424,13 @@
     const $leagueName = document.getElementById('leagueName');
     const $createLeagueBtn = document.getElementById('createLeagueBtn');
 
-    // Nav
-    const $nav = document.getElementById('nav');
-    const $hamburger = document.getElementById('hamburger');
-    const $navItems = document.getElementById('navItems');
-    const navButtons = Array.from(document.querySelectorAll('.navbtn'));
+    // Drawer + nav
+    const $drawer = document.getElementById('drawer');
+    const $openDrawer = document.getElementById('openDrawer');
+    const $closeDrawer = document.getElementById('closeDrawer');
+    const $drawerBackdrop = document.getElementById('drawerBackdrop');
+    const navLinks = () => Array.from(document.querySelectorAll('.navlink'));
+    const $checkUpdateBtn = document.getElementById('checkUpdateBtn');
 
     // ===== UTILS =====
     function bandFor(rank){
@@ -311,7 +446,7 @@
       $toast.textContent = msg;
       $toast.classList.remove('hide');
       clearTimeout(showToast._t);
-      showToast._t = setTimeout(()=> $toast.classList.add('hide'), 3000);
+      showToast._t = setTimeout(()=> $toast.classList.add('hide'), 2600);
     }
     function isSelected(id){ return Object.values(picks).some(arr => arr.includes(id)); }
     function calcSpentFromPicks(p){
@@ -347,6 +482,7 @@
     // ===== RENDERERS =====
     function renderSelected(){
       const $sel = document.getElementById('selected');
+      if (!$sel) return;
       $sel.innerHTML = '';
       const allSel = Object.values(picks).flat();
       if (allSel.length === 0){
@@ -377,8 +513,10 @@
     }
 
     function render(players){
-      $grid.setAttribute('aria-busy','true');
-      $grid.innerHTML = '';
+      const $gridEl = document.getElementById('grid');
+      if (!$gridEl) return;
+      $gridEl.setAttribute('aria-busy','true');
+      $gridEl.innerHTML = '';
       for (const p of players){
         const band = bandFor(p.rank);
         const id = `${p.rank}|${p.name}`;
@@ -401,37 +539,56 @@
           </div>
           <div class="tag ${band}" aria-hidden="true">${band}</div>
         `;
-        $grid.appendChild(card);
+        $gridEl.appendChild(card);
       }
-      $grid.setAttribute('aria-busy','false');
+      $gridEl.setAttribute('aria-busy','false');
       updateStatus();
     }
 
     function updateStatus(){
       const v = $bandFilter.value;
+      const $statusEl = document.getElementById('status');
+      if (!$statusEl) return;
       const map = {all:'All', A:'Band A (1–10)', B:'Band B (11–30)', C:'Band C (31–50)', D:'Band D (51–100)'};
       const showing = currentFilteredPlayers().length;
-      $status.textContent = `Showing ${showing} players • Filter: ${map[v]} • Budget left: ${formatM(budget)}. Click a player to add/remove (max ${MAX_PER_BAND} per band).`;
+      $statusEl.textContent = `Showing ${showing} players • Filter: ${map[v]} • Budget left: ${formatM(budget)}. Click a player to add/remove (max ${MAX_PER_BAND} per band).`;
     }
 
     function renderFiltered(){ render(currentFilteredPlayers()); }
 
-    // ===== NAV =====
+    // ===== NAV / DRAWER =====
+    function setActiveNav(view){
+      navLinks().forEach(b => b.classList.toggle('active', b.dataset.view===view));
+    }
     function switchView(view){
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById(`view-${view}`).classList.add('active');
-      document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.view===view));
+      const target = document.getElementById(`view-${view}`);
+      if (target) target.classList.add('active');
+      setActiveNav(view);
       if (view==='teams'){ renderTeamsList(); }
       if (view==='leagues'){ renderLeaguesList(); }
       if (view==='stats'){ renderLeaderboard(); }
+      if (view==='myteam'){ renderFiltered(); updateCounters(); }
+      closeDrawer();
     }
-    navButtons.forEach(btn => btn.addEventListener('click', ()=> switchView(btn.dataset.view)));
-    $hamburger.addEventListener('click', ()=> $nav.classList.toggle('open'));
+    function openDrawer(){ $drawer.classList.add('open'); $drawer.setAttribute('aria-hidden','false'); }
+    function closeDrawer(){ $drawer.classList.remove('open'); $drawer.setAttribute('aria-hidden','true'); }
+
+    $openDrawer.addEventListener('click', openDrawer);
+    $closeDrawer.addEventListener('click', closeDrawer);
+    $drawerBackdrop.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', (e)=>{ if (e.key==='Escape') closeDrawer(); });
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.navlink');
+      if (!btn) return;
+      const view = btn.dataset.view;
+      if (view) switchView(view);
+    });
 
     // ===== INTERACTIONS (My Team) =====
-    $bandFilter.addEventListener('change', renderFiltered);
+    if ($bandFilter) $bandFilter.addEventListener('change', renderFiltered);
 
-    $grid.addEventListener('click', (e) => {
+    if ($grid) $grid.addEventListener('click', (e) => {
       const btn = e.target.closest('button.card');
       if (!btn) return;
 
@@ -459,7 +616,8 @@
       renderFiltered();
     });
 
-    document.getElementById('clearBtn').addEventListener('click', () => {
+    const $clearBtn = document.getElementById('clearBtn');
+    if ($clearBtn) $clearBtn.addEventListener('click', () => {
       if (!Object.values(picks).some(arr => arr.length)) return;
       picks.A = []; picks.B = []; picks.C = []; picks.D = [];
       updateCounters();
@@ -467,7 +625,8 @@
       showToast('All selections cleared.');
     });
 
-    document.getElementById('copyBtn').addEventListener('click', async () => {
+    const $copyBtn = document.getElementById('copyBtn');
+    if ($copyBtn) $copyBtn.addEventListener('click', async () => {
       const spent = calcSpent();
       const left = MAX_BUDGET - spent;
       function lineFor(band){
@@ -489,7 +648,7 @@
       catch{
         const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
         ta.select(); try{ document.execCommand('copy'); showToast('Picks copied to clipboard.'); }
-        catch{ showToast('Copy failed. You can select & copy manually.'); }
+        catch{ showToast('Copy failed.'); }
         finally{ document.body.removeChild(ta); }
       }
     });
@@ -534,7 +693,6 @@
         container.appendChild(p);
         return;
       }
-      // Sort by total points desc
       all.sort((a,b)=> getTotalPoints(b)-getTotalPoints(a) || a.name.localeCompare(b.name));
       for (const t of all){
         const wrapper = document.createElement('div');
@@ -608,9 +766,7 @@
           team.results = (team.results||[]).filter(r => r.id !== resId);
           team.updatedAt = new Date().toISOString();
           upsertTeam(teamName, team);
-          renderTeamsList();
-          renderLeaderboard();
-          renderLeaguesList();
+          renderTeamsList(); renderLeaderboard(); renderLeaguesList();
           showToast('Result removed.');
         });
       });
@@ -629,9 +785,7 @@
           team.results.push({id:idNow(), tournament, points, date});
           team.updatedAt = new Date().toISOString();
           upsertTeam(teamName, team);
-          renderTeamsList();
-          renderLeaderboard();
-          renderLeaguesList();
+          renderTeamsList(); renderLeaderboard(); renderLeaguesList();
           showToast('Result added.');
         });
       });
@@ -641,7 +795,6 @@
     $saveTeamBtn.addEventListener('click', ()=>{
       const name = ($teamName.value || '').trim();
       if (!name){ showToast('Enter a team name.'); return; }
-      // Uniqueness: if name exists, confirm update
       if (teamExists(name)){
         if (!confirm('Team name already exists. Update that team with your current picks?')) return;
       }
@@ -649,14 +802,9 @@
       upsertTeam(name, team);
       myTeamName = name;
       localStorage.setItem(STORAGE_KEY_MYNAME, myTeamName);
-      renderTeamsList();
-      renderLeaderboard();
-      renderLeaguesList();
+      renderTeamsList(); renderLeaderboard(); renderLeaguesList();
       showToast('Team saved.');
     });
-
-    // Initialize team name field
-    if (myTeamName){ $teamName.value = myTeamName; }
 
     // Export/Import
     $exportTeamsBtn.addEventListener('click', async ()=>{
@@ -664,15 +812,13 @@
       try{ await navigator.clipboard.writeText(payload); showToast('Teams JSON copied to clipboard.'); }
       catch{
         const ta=document.createElement('textarea'); ta.value=payload; document.body.appendChild(ta);
-        ta.select(); try{ document.execCommand('copy'); showToast('Teams JSON copied to clipboard.'); }
-        catch{ showToast('Copy failed. You can select & copy manually.'); }
+        ta.select(); try{ document.execCommand('copy'); showToast('Teams JSON copied.'); }
+        catch{ showToast('Copy failed.'); }
         finally{ document.body.removeChild(ta); }
       }
     });
     $importTeamsBtn.addEventListener('click', ()=>{ $importArea.classList.remove('hide'); });
-    $cancelImportBtn.addEventListener('click', ()=>{
-      $importArea.classList.add('hide'); $importTextarea.value='';
-    });
+    $cancelImportBtn.addEventListener('click', ()=>{ $importArea.classList.add('hide'); $importTextarea.value=''; });
     $confirmImportBtn.addEventListener('click', ()=>{
       let obj;
       try{ obj = JSON.parse($importTextarea.value); }catch(e){ showToast('Invalid JSON.'); return; }
@@ -682,43 +828,33 @@
       let added=0, skipped=0;
       for (const [name, team] of Object.entries(incoming)){
         if (teams.teams[name]){ skipped++; continue; }
-        // Basic sanitize
         team.name = name;
         team.results = Array.isArray(team.results)? team.results : [];
         teams.teams[name]=team; added++;
       }
       saveTeams();
-      renderTeamsList();
-      renderLeaderboard();
-      renderLeaguesList();
+      renderTeamsList(); renderLeaderboard(); renderLeaguesList();
       showToast(`Import complete: ${added} added, ${skipped} skipped.`);
-      $importArea.classList.add('hide');
-      $importTextarea.value='';
+      $importArea.classList.add('hide'); $importTextarea.value='';
     });
 
     // ===== ADMIN MODE =====
     function updateAdminUI(){
       $adminBtn.textContent = adminEnabled ? '✅ Admin ON' : '🔒 Admin mode';
-      renderTeamsList();
-      renderLeaguesList();
+      renderTeamsList(); renderLeaguesList();
     }
     $adminBtn.addEventListener('click', ()=>{
       if (adminEnabled){
         adminEnabled = false;
         localStorage.setItem(STORAGE_KEY_ADMIN, JSON.stringify(adminEnabled));
-        updateAdminUI();
-        showToast('Admin disabled.');
-        return;
+        updateAdminUI(); showToast('Admin disabled.'); return;
       }
       const pin = prompt('Enter admin PIN');
       if (pin === ADMIN_PIN){
         adminEnabled = true;
         localStorage.setItem(STORAGE_KEY_ADMIN, JSON.stringify(adminEnabled));
-        updateAdminUI();
-        showToast('Admin enabled.');
-      } else {
-        showToast('Incorrect PIN.');
-      }
+        updateAdminUI(); showToast('Admin enabled.');
+      } else { showToast('Incorrect PIN.'); }
     });
 
     // ===== LEAGUES =====
@@ -750,7 +886,6 @@
         container.appendChild(p);
         return;
       }
-      // Sort by createdAt
       all.sort((a,b)=> (a.createdAt||'').localeCompare(b.createdAt||''));
       for (const L of all){
         const wrap = document.createElement('div');
@@ -758,7 +893,6 @@
         wrap.style.flexDirection='column';
         wrap.style.alignItems='stretch';
 
-        // Members table
         const memberTeams = (L.members||[])
           .map(name => teams.teams[name])
           .filter(Boolean)
@@ -779,7 +913,7 @@
           <div class="row" style="justify-content:space-between;align-items:center">
             <div>
               <div style="font-weight:800">${escapeHTML(L.name)}</div>
-              <div class="sub">Invite code: <span class="kbd">${L.inviteCode}</span></div>
+              <div class="sub">Invite code: <code class="kbd">${L.inviteCode}</code></div>
             </div>
             <div class="row">
               <button data-action="copyCode" data-code="${L.inviteCode}">Copy code</button>
@@ -790,7 +924,6 @@
         `;
         container.appendChild(wrap);
       }
-      // Wire actions
       container.querySelectorAll('button[data-action="copyCode"]').forEach(b=>{
         b.addEventListener('click', async ()=>{
           const code = b.getAttribute('data-code');
@@ -804,9 +937,7 @@
           const id = b.getAttribute('data-id');
           if (!confirm('Delete this league?')) return;
           delete leagues.leagues[id];
-          saveLeagues();
-          renderLeaguesList();
-          showToast('League deleted.');
+          saveLeagues(); renderLeaguesList(); showToast('League deleted.');
         });
       });
     }
@@ -839,6 +970,7 @@
     // ===== STATS =====
     function renderLeaderboard(){
       const tbody = document.querySelector('#leaderboard tbody');
+      if (!tbody){ return; }
       tbody.innerHTML = '';
       const all = Object.values(teams.teams || {});
       if (!all.length){
@@ -855,21 +987,23 @@
       });
     }
 
+    // ===== UPDATE BUTTON =====
+    $checkUpdateBtn.addEventListener('click', ()=> hardUpdate('manual'));
+
     // ===== INIT =====
-    // Default league (global)
+    function ensureLeaguesShape(){ if (!leagues || typeof leagues!=='object' || !leagues.leagues) leagues={leagues:{}}; }
     ensureLeaguesShape();
     if (!Object.keys(leagues.leagues).length){
-      const global = createLeague('Global League');
-      // optional: auto-join your team when saved later
+      createLeague('Global League'); // default
     }
-
-    // Admin UI
-    updateAdminUI();
+    function updateAdminUIInit(){ $adminBtn.textContent = adminEnabled ? '✅ Admin ON' : '🔒 Admin mode'; }
+    updateAdminUIInit();
 
     // Ensure budget label starts at the correct value
     $budget.textContent = formatM(budget);
     updateCounters();    // sets counters, budget, selected section, status
-    renderFiltered();    // paints the grid according to current filter ("All" by default)
+    // Default landing is HOME now
+    switchView('home');
 
     // Persist my team name in field if present
     if (myTeamName) $teamName.value = myTeamName;
