@@ -14,21 +14,17 @@
   <meta name="apple-mobile-web-app-title" content="FantaTennis" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="manifest" href="manifest.json" />
-  <!-- Use this specific icon on iPhone -->
+  <!-- iPhone icon -->
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon1-180.png" />
   <style>
     :root{
       --bg:#0b1020; --card:#111834; --text:#e5e7eb; --muted:#9aa4b2;
       --a:#ef4444; --b:#3b82f6; --c:#10b981; --d:#f59e0b;
       --ok:#22c55e; --ring:#334155; --accent:#7dd3fc;
-      --blueHero:#0f3aad;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0a0f1f 0%, #0f1731 100%);color:var(--text)}
-    header{
-      position:sticky;top:0;background:rgba(11,16,32,0.85);
-      backdrop-filter:blur(10px);border-bottom:1px solid #1f2a44;z-index:20
-    }
+    header{position:sticky;top:0;background:rgba(11,16,32,0.85);backdrop-filter:blur(10px);border-bottom:1px solid #1f2a44;z-index:20}
     .wrap{max-width:1100px;margin:0 auto;padding:12px 16px}
     .topbar{display:flex;align-items:center;gap:10px}
     .brand{font-weight:800;letter-spacing:.6px}
@@ -51,10 +47,7 @@
       display:flex;align-items:center;gap:12px;min-height:64px;transition:border-color .2s, transform .05s
     }
     .card:hover{border-color:#2a3a6a}
-    .rank{
-      width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
-      background:#0c132b;border:1px solid #26325a;color:#cbd5e1;font-weight:700
-    }
+    .rank{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#0c132b;border:1px solid #26325a;color:#cbd5e1;font-weight:700}
     .name{font-weight:700;letter-spacing:.2px}
     .meta{color:var(--muted);font-size:.85rem;margin-top:2px}
     .tag{margin-left:auto;font-weight:800;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;color:#0b1020}
@@ -66,32 +59,37 @@
     .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
     .bandCount{font-weight:700}
     code.kbd{background:#0c132b;padding:2px 6px;border:1px solid #26325a;border-radius:6px}
-    /* Drawer */
+
+    /* Drawer (burger menu) */
     .drawer{position:fixed;inset:0;pointer-events:none;z-index:90}
+    .drawer .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.35);opacity:0;transition:opacity .2s ease;z-index:1}
     .drawer .panel{
       position:absolute;left:0;top:0;height:100%;width:260px;background:#0b1020;border-right:1px solid #1d2748;
-      transform:translateX(-100%);transition:transform .2s ease;box-shadow:8px 0 30px rgba(0,0,0,.35);padding:16px
+      transform:translateX(-100%);transition:transform .2s ease;box-shadow:8px 0 30px rgba(0,0,0,.35);padding:16px;z-index:2
     }
-    .drawer .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.35);opacity:0;transition:opacity .2s ease}
     .drawer.open{pointer-events:auto}
     .drawer.open .panel{transform:translateX(0)}
     .drawer.open .backdrop{opacity:1}
+
     /* HOME */
     #view-home{
       position:relative;min-height:calc(100vh - 72px);display:grid;place-items:center;
       background:linear-gradient(180deg, #0f3aad 0%, #1e40af 100%);border-radius:20px;margin-top:12px
     }
-    .hero-text{ text-align:center;line-height:0.9;font-weight:900;letter-spacing:1px;font-size:clamp(56px, 16vw, 160px);color:#eaf2ff;text-shadow:0 6px 24px rgba(0,0,0,.35)}
+    .hero-text{text-align:center;line-height:0.9;font-weight:900;letter-spacing:1px;font-size:clamp(56px, 16vw, 160px);color:#eaf2ff;text-shadow:0 6px 24px rgba(0,0,0,.35)}
     .hero-text span{display:block}
     .hero-sub{margin-top:12px;color:#dbeafe;font-weight:600;letter-spacing:.5px;text-align:center}
+
     /* Tables */
     .table{width:100%;border-collapse:collapse}
     .table th,.table td{border-bottom:1px solid #223055;padding:8px 10px;text-align:left}
     .table th{color:#cbd5e1;font-weight:700}
-    /* Sections hidden by default */
+
+    /* Sections are hidden until chosen from the menu */
     .section{display:none}
     .section.active{display:block}
-    /* Mobile */
+
+    /* Mobile tweaks */
     @media (max-width:720px){
       .wrap{padding:12px}
       .grid{grid-template-columns:1fr}
@@ -100,8 +98,9 @@
   </style>
 </head>
 <body>
-  <!-- Left drawer for navigation -->
+  <!-- Drawer (backdrop FIRST, then panel) -->
   <aside id="drawer" class="drawer" aria-hidden="true">
+    <div class="backdrop" id="drawerBackdrop" tabindex="-1" aria-hidden="true"></div>
     <div class="panel" role="menu" aria-label="Main menu">
       <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:12px">
         <div style="font-weight:800">Menu</div>
@@ -116,7 +115,6 @@
         <button class="navbtn" id="checkUpdateBtn">↻ Check updates</button>
       </div>
     </div>
-    <div class="backdrop" id="drawerBackdrop" tabindex="-1" aria-hidden="true"></div>
   </aside>
 
   <header>
@@ -131,7 +129,7 @@
   </header>
 
   <main class="wrap">
-    <!-- HOME (new landing page) -->
+    <!-- HOME -->
     <section id="view-home" class="section active" aria-label="Home">
       <div>
         <div class="hero-text">
@@ -142,7 +140,7 @@
       </div>
     </section>
 
-    <!-- My Team (everything moved here; not in header) -->
+    <!-- MY TEAM -->
     <section id="view-myteam" class="section" aria-label="My Team">
       <h2>My Team</h2>
 
@@ -193,7 +191,7 @@
       </div>
     </section>
 
-    <!-- Teams -->
+    <!-- TEAMS -->
     <section id="view-teams" class="section" aria-label="Teams">
       <h2>Teams</h2>
       <div class="row" style="margin-bottom:8px">
@@ -211,7 +209,7 @@
       </div>
     </section>
 
-    <!-- Leagues -->
+    <!-- LEAGUES -->
     <section id="view-leagues" class="section" aria-label="Leagues">
       <h2>Leagues</h2>
       <div class="row" style="gap:12px;margin-bottom:10px">
@@ -230,7 +228,7 @@
       <div id="leaguesList"></div>
     </section>
 
-    <!-- Statistics -->
+    <!-- STATS -->
     <section id="view-stats" class="section" aria-label="Statistics">
       <h2>Leaderboard (Total Points)</h2>
       <table class="table" id="leaderboard">
@@ -242,9 +240,9 @@
 
   <div id="toast" class="toast hide" role="alert"></div>
 
-  <!-- Update / SW bootstrap (ensures new versions appear everywhere) -->
+  <!-- Update / SW bootstrap -->
   <script>
-    const APP_VERSION = '2025.08.29.navfix-v2'; // bump on each deploy
+    const APP_VERSION = '2025.08.29.navfix-v3'; // bump on each deploy
 
     async function hardUpdate(reason='manual'){
       try{
@@ -334,7 +332,7 @@
     let adminEnabled = JSON.parse(localStorage.getItem(STORAGE_KEY_ADMIN) || 'false');
     let myTeamName = localStorage.getItem(STORAGE_KEY_MYNAME) || '';
 
-    // ===== ELTS =====
+    // ===== ELEMENTS =====
     const $drawer = document.getElementById('drawer');
     const $openDrawer = document.getElementById('openDrawer');
     const $closeDrawer = document.getElementById('closeDrawer');
@@ -386,7 +384,7 @@
     function todayISO(){ return new Date().toISOString().slice(0,10); }
     function idNow(){ return Math.random().toString(36).slice(2,10); }
 
-    // ===== NAV / DRAWER (robust) =====
+    // ===== DRAWER =====
     function openDrawer(){ $drawer.classList.add('open'); $drawer.setAttribute('aria-hidden','false'); }
     function closeDrawer(){ $drawer.classList.remove('open'); $drawer.setAttribute('aria-hidden','true'); }
     $openDrawer.addEventListener('click', openDrawer);
@@ -394,6 +392,7 @@
     $drawerBackdrop.addEventListener('click', closeDrawer);
     document.addEventListener('keydown', (e)=>{ if (e.key==='Escape') closeDrawer(); });
 
+    // ===== VIEW SWITCHING =====
     function switchView(view){
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       const target = document.getElementById(`view-${view}`);
@@ -405,7 +404,7 @@
       closeDrawer();
     }
 
-    // Explicitly wire menu buttons (fixes non-working burger on some setups)
+    // Wire menu buttons (now that backdrop layering is correct, clicks land)
     document.querySelectorAll('.panel .navbtn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         if (btn.id === 'checkUpdateBtn'){ hardUpdate('manual'); return; }
@@ -414,7 +413,7 @@
       });
     });
 
-    // ===== MY TEAM interactions =====
+    // ===== MY TEAM =====
     function updateCounters(){
       if ($cntA){ $cntA.textContent = `${picks.A.length}/${MAX_PER_BAND}`; }
       if ($cntB){ $cntB.textContent = `${picks.B.length}/${MAX_PER_BAND}`; }
@@ -516,18 +515,15 @@
     function buildTeamFromCurrent(name){ return { name, picks: JSON.parse(JSON.stringify(picks)), createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(), results: teams.teams[name]?.results || [] }; }
     function getTotalPoints(team){ return (team.results||[]).reduce((a,r)=> a + (Number(r.points)||0), 0); }
 
-    const $saveTeamBtnEl = document.getElementById('saveTeamBtn');
-    if ($saveTeamBtnEl) $saveTeamBtnEl.addEventListener('click', ()=>{
+    if ($saveTeamBtn) $saveTeamBtn.addEventListener('click', ()=>{
       const name = ($teamName.value||'').trim(); if (!name){ showToast('Enter a team name.'); return; }
       if (teamExists(name) && !confirm('Team exists. Update with current picks?')) return;
       const team = buildTeamFromCurrent(name); upsertTeam(name, team); myTeamName=name; localStorage.setItem(STORAGE_KEY_MYNAME, myTeamName);
       renderTeamsList(); renderLeaderboard(); renderLeaguesList(); showToast('Team saved.');
     });
 
-    const $exportTeamsBtnEl = document.getElementById('exportTeamsBtn');
-    if ($exportTeamsBtnEl) $exportTeamsBtnEl.addEventListener('click', async ()=>{ const payload=JSON.stringify(teams,null,2); try{ await navigator.clipboard.writeText(payload); showToast('Teams JSON copied.'); }catch{ showToast('Copy failed.'); }});
-    const $importTeamsBtnEl = document.getElementById('importTeamsBtn');
-    if ($importTeamsBtnEl) $importTeamsBtnEl.addEventListener('click', ()=>{ $importArea.classList.remove('hide'); });
+    if ($exportTeamsBtn) $exportTeamsBtn.addEventListener('click', async ()=>{ const payload=JSON.stringify(teams,null,2); try{ await navigator.clipboard.writeText(payload); showToast('Teams JSON copied.'); }catch{ showToast('Copy failed.'); }});
+    if ($importTeamsBtn) $importTeamsBtn.addEventListener('click', ()=>{ $importArea.classList.remove('hide'); });
     if ($cancelImportBtn) $cancelImportBtn.addEventListener('click', ()=>{ $importArea.classList.add('hide'); $importTextarea.value=''; });
     if ($confirmImportBtn) $confirmImportBtn.addEventListener('click', ()=>{
       let obj; try{ obj = JSON.parse($importTextarea.value); }catch{ showToast('Invalid JSON.'); return; }
@@ -543,7 +539,7 @@
     function updateAdminUI(){ const b=document.getElementById('adminBtn'); if (b) b.textContent = adminEnabled ? '✅ Admin ON' : '🔒 Admin mode'; renderTeamsList(); renderLeaguesList(); }
     if ($adminBtn) $adminBtn.addEventListener('click', ()=>{
       if (adminEnabled){ adminEnabled=false; localStorage.setItem(STORAGE_KEY_ADMIN,'false'); updateAdminUI(); showToast('Admin disabled.'); return; }
-      const pin = prompt('Enter admin PIN'); if (pin==='123456'){ adminEnabled=true; localStorage.setItem(STORAGE_KEY_ADMIN,'true'); updateAdminUI(); showToast('Admin enabled.'); } else showToast('Incorrect PIN.');
+      const pin = prompt('Enter admin PIN'); if (pin===ADMIN_PIN){ adminEnabled=true; localStorage.setItem(STORAGE_KEY_ADMIN,'true'); updateAdminUI(); showToast('Admin enabled.'); } else showToast('Incorrect PIN.');
     });
 
     // Teams list
@@ -621,7 +617,7 @@
       container.querySelectorAll('button[data-action="deleteLeague"]').forEach(b=> b.addEventListener('click', ()=>{ if (!adminEnabled){ showToast('Admin only.'); return; } const id=b.dataset.id; if(!confirm('Delete this league?')) return; delete leagues.leagues[id]; saveLeagues(); renderLeaguesList(); showToast('League deleted.'); }));
     }
     if ($createLeagueBtn) $createLeagueBtn.addEventListener('click', ()=>{ if (!adminEnabled){ showToast('Admin only.'); return; } const name=($leagueName.value||'').trim(); if(!name){ showToast('League name required.'); return; } const L=createLeague(name); $leagueName.value=''; renderLeaguesList(); showToast(`League created. Code: ${L.inviteCode}`); });
-    if ($joinLeagueBtn) $joinLeagueBtn.addEventListener('click', ()=>{ const code=($joinCode.value||'').trim().toUpperCase(); if(!code){ showToast('Enter invite code.'); return; } if(!myTeamName || !teams.teams[myTeamName]){ showToast('Save your team first.'); return; } const L=findLeagueByCode(code); if(!L){ showToast('League not found.'); return; } if(!L.members) L.members=[]; if(L.members.includes(myTeamName)){ showToast('Team already in league.'); return; } L.members.push(myTeamName); saveLeagues(); $joinCode.value=''; renderLeaguesList(); showToast('Joined league!'); });
+    if ($joinLeagueBtn) $joinLeagueBtn.addEventListener('click', ()=>{ const code=($joinCode.value||'').trim().toUpperCase(); if(!code){ showToast('Enter invite code.'); return; } if(!myTeamName || !teams.teams[myTeamName]){ showToast('Save your team first.'); return; } const L=findLeagueByCode(code); if(!L){ showToast('League not found.'); return; } if (!L.members) L.members=[]; if (L.members.includes(myTeamName)){ showToast('Team already in league.'); return; } L.members.push(myTeamName); saveLeagues(); $joinCode.value=''; renderLeaguesList(); showToast('Joined league!'); });
 
     // Stats
     function renderLeaderboard(){
@@ -636,11 +632,9 @@
     ensureLeaguesInit();
     if (!Object.keys(leagues.leagues).length){ createLeague('Global League'); }
     if (myTeamName) { const el=document.getElementById('teamName'); if (el) el.value=myTeamName; }
-    function initAdmin(){ const b=document.getElementById('adminBtn'); if (b) b.textContent = adminEnabled ? '✅ Admin ON' : '🔒 Admin mode'; }
-    initAdmin();
+    (function initAdmin(){ const b=document.getElementById('adminBtn'); if (b) b.textContent = adminEnabled ? '✅ Admin ON' : '🔒 Admin mode'; })();
     updateBudget();
-    // Start on Home, other sections hidden until menu click
-    switchView('home');
+    switchView('home'); // start on Home
   </script>
 </body>
 </html>
