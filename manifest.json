@@ -1,0 +1,18 @@
+{
+  "name": "FantaTennis App",
+  "short_name": "FantaTennis",
+  "description": "Pick your fantasy squad from ATP's Top 100 with band limits.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b1020",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "icons/apple-touch-icon1-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
