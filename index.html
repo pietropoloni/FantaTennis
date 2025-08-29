@@ -9,7 +9,7 @@
   <title>FantaTennis App</title>
   <meta name="description" content="Pick your fantasy tennis squad from the ATP Top 100." />
   <meta name="theme-color" content="#0f172a" />
-  <!-- iOS PWA tweaks -->
+  <!-- iOS PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="FantaTennis" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -30,15 +30,9 @@
       backdrop-filter:blur(10px);border-bottom:1px solid #1f2a44;z-index:20
     }
     .wrap{max-width:1100px;margin:0 auto;padding:12px 16px}
-    h1{margin:0 0 2px;font-size:1.35rem;letter-spacing:.2px}
-    h2{margin:18px 0 8px}
-    .sub{color:var(--muted);font-size:.9rem}
-
-    /* Top bar */
     .topbar{display:flex;align-items:center;gap:10px}
     .brand{font-weight:800;letter-spacing:.6px}
     .spacer{flex:1}
-    .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     button{
       background:#1b2344;color:#e5e7eb;border:1px solid #2a3665;border-radius:12px;
       padding:9px 12px;font-weight:600;cursor:pointer;transition:.2s;box-shadow:0 1px 0 #000 inset
@@ -48,12 +42,8 @@
     select, input[type="text"], input[type="number"], input[type="date"], textarea{
       padding:8px 10px;border-radius:8px;background:#1b2344;color:#e5e7eb;border:1px solid #2a3665
     }
-    input[type="number"]{width:120px}
-    textarea{width:100%;min-height:120px;resize:vertical}
     .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--ring);border-radius:999px;background:#0c132b}
     .dot{width:10px;height:10px;border-radius:999px}
-
-    /* Grid + cards */
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin:16px 0 28px}
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     .card{
@@ -67,76 +57,44 @@
     }
     .name{font-weight:700;letter-spacing:.2px}
     .meta{color:var(--muted);font-size:.85rem;margin-top:2px}
-    .tag{
-      margin-left:auto;font-weight:800;display:inline-flex;align-items:center;justify-content:center;
-      width:28px;height:28px;border-radius:8px;color:#0b1020
-    }
-    .tag.A{background:var(--a)}
-    .tag.B{background:var(--b)}
-    .tag.C{background:var(--c)}
-    .tag.D{background:var(--d)}
+    .tag{margin-left:auto;font-weight:800;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;color:#0b1020}
+    .tag.A{background:var(--a)} .tag.B{background:var(--b)} .tag.C{background:var(--c)} .tag.D{background:var(--d)}
     .card.sel{outline:2px solid var(--accent); outline-offset:2px; transform:translateY(-1px)}
-    .toast{
-      position:fixed;right:14px;bottom:14px;background:#111834;border:1px solid #2a3665;
-      padding:12px 14px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:100;max-width:90vw
-    }
+    .toast{position:fixed;right:14px;bottom:14px;background:#111834;border:1px solid #2a3665;padding:12px 14px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:100;max-width:90vw}
     .hide{display:none}
     .footer{color:var(--muted);font-size:.85rem;margin:20px 0 40px}
     .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
     .bandCount{font-weight:700}
-    a.link{color:#93c5fd;text-decoration:none;border-bottom:1px dotted #93c5fd}
-    a.link:hover{border-bottom-style:solid}
     code.kbd{background:#0c132b;padding:2px 6px;border:1px solid #26325a;border-radius:6px}
-
-    /* Top nav (desktop) + Burger (mobile) */
-    .navbar{display:flex;align-items:center;gap:8px;margin-top:8px}
-    .navbtn{padding:8px 12px;border-radius:10px}
-    .navbtn.active{outline:2px solid var(--accent); background:#203060}
-    .hamburger{
-      display:inline-flex;align-items:center;justify-content:center;
-      width:40px;height:40px;border-radius:10px;background:#1b2344;border:1px solid #2a3665
-    }
-    .hamburger:hover{background:#243063}
-
     /* Drawer */
     .drawer{position:fixed;inset:0;pointer-events:none;z-index:90}
     .drawer .panel{
       position:absolute;left:0;top:0;height:100%;width:260px;background:#0b1020;border-right:1px solid #1d2748;
       transform:translateX(-100%);transition:transform .2s ease;box-shadow:8px 0 30px rgba(0,0,0,.35);padding:16px
     }
-    .drawer .backdrop{
-      position:absolute;inset:0;background:rgba(0,0,0,.35);opacity:0;transition:opacity .2s ease
-    }
+    .drawer .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.35);opacity:0;transition:opacity .2s ease}
     .drawer.open{pointer-events:auto}
     .drawer.open .panel{transform:translateX(0)}
     .drawer.open .backdrop{opacity:1}
-
-    /* HERO HOME PAGE */
+    /* HOME */
     #view-home{
-      position:relative;min-height:calc(100vh - 90px);display:grid;place-items:center;
-      background:linear-gradient(180deg, #0f3aad 0%, #1e40af 100%);
-      border-radius:20px;margin-top:12px
+      position:relative;min-height:calc(100vh - 72px);display:grid;place-items:center;
+      background:linear-gradient(180deg, #0f3aad 0%, #1e40af 100%);border-radius:20px;margin-top:12px
     }
-    .hero-text{
-      text-align:center;line-height:0.9;
-      font-weight:900;letter-spacing:1px;
-      font-size:clamp(56px, 16vw, 160px);
-      color:#eaf2ff;text-shadow:0 6px 24px rgba(0,0,0,.35)
-    }
+    .hero-text{ text-align:center;line-height:0.9;font-weight:900;letter-spacing:1px;font-size:clamp(56px, 16vw, 160px);color:#eaf2ff;text-shadow:0 6px 24px rgba(0,0,0,.35)}
     .hero-text span{display:block}
-    .hero-sub{margin-top:12px;color:#dbeafe;font-weight:600;letter-spacing:.5px}
-
+    .hero-sub{margin-top:12px;color:#dbeafe;font-weight:600;letter-spacing:.5px;text-align:center}
     /* Tables */
     .table{width:100%;border-collapse:collapse}
     .table th,.table td{border-bottom:1px solid #223055;padding:8px 10px;text-align:left}
     .table th{color:#cbd5e1;font-weight:700}
-
-    /* Mobile tweaks */
+    /* Sections hidden by default */
+    .section{display:none}
+    .section.active{display:block}
+    /* Mobile */
     @media (max-width:720px){
       .wrap{padding:12px}
       .grid{grid-template-columns:1fr}
-      .topbar .controls-right{display:none} /* hide some desktop controls on small screens */
-      .navbar{display:none} /* use drawer on mobile */
       .brand{font-size:1.1rem}
     }
   </style>
@@ -147,14 +105,15 @@
     <div class="panel" role="menu" aria-label="Main menu">
       <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:12px">
         <div style="font-weight:800">Menu</div>
-        <button id="closeDrawer" class="hamburger" aria-label="Close menu">✕</button>
+        <button id="closeDrawer" aria-label="Close menu">✕</button>
       </div>
       <div class="row" style="flex-direction:column;align-items:stretch;gap:8px">
-        <button class="navbtn navlink" data-view="home">🏠 Home</button>
-        <button class="navbtn navlink" data-view="myteam">🎾 My Team</button>
-        <button class="navbtn navlink" data-view="teams">👥 Teams</button>
-        <button class="navbtn navlink" data-view="leagues">🏆 Leagues</button>
-        <button class="navbtn navlink" data-view="stats">📈 Statistics</button>
+        <button class="navbtn" data-view="home">🏠 Home</button>
+        <button class="navbtn" data-view="myteam">🎾 My Team</button>
+        <button class="navbtn" data-view="teams">👥 Teams</button>
+        <button class="navbtn" data-view="leagues">🏆 Leagues</button>
+        <button class="navbtn" data-view="stats">📈 Statistics</button>
+        <button class="navbtn" id="checkUpdateBtn">↻ Check updates</button>
       </div>
     </div>
     <div class="backdrop" id="drawerBackdrop" tabindex="-1" aria-hidden="true"></div>
@@ -164,28 +123,31 @@
     <div class="wrap">
       <div class="topbar">
         <!-- Burger on top-left -->
-        <button id="openDrawer" class="hamburger" aria-label="Open menu">☰</button>
-
+        <button id="openDrawer" aria-label="Open menu">☰</button>
         <div class="brand">FantaTennis</div>
         <div class="spacer"></div>
-
-        <!-- Desktop quick nav -->
-        <nav class="navbar" aria-label="Sections">
-          <button class="navbtn navlink active" data-view="home">Home</button>
-          <button class="navbtn navlink" data-view="myteam">My Team</button>
-          <button class="navbtn navlink" data-view="teams">Teams</button>
-          <button class="navbtn navlink" data-view="leagues">Leagues</button>
-          <button class="navbtn navlink" data-view="stats">Statistics</button>
-        </nav>
-
-        <!-- Right side quick actions (hidden on mobile) -->
-        <div class="controls controls-right">
-          <button id="checkUpdateBtn" title="Force update / refresh caches">↻ Check updates</button>
-        </div>
       </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- HOME (new landing page) -->
+    <section id="view-home" class="section active" aria-label="Home">
+      <div>
+        <div class="hero-text">
+          <span>FANTA</span>
+          <span>TENNIS</span>
+        </div>
+        <div class="hero-sub">Open the menu ☰ to get started</div>
+      </div>
+    </section>
+
+    <!-- My Team (everything moved here; not in header) -->
+    <section id="view-myteam" class="section" aria-label="My Team">
+      <h2>My Team</h2>
 
       <div class="sub">Pick up to <b>3 players per band</b> from the official ATP Top 100 (static list as of Aug 25, 2025).
-        <span class="legend">
+        <span class="legend" style="display:block;margin-top:8px">
           <span class="pill"><span class="dot" style="background:var(--a)"></span> A (1–10) <span id="cntA" class="bandCount">0/3</span></span>
           <span class="pill"><span class="dot" style="background:var(--b)"></span> B (11–30) <span id="cntB" class="bandCount">0/3</span></span>
           <span class="pill"><span class="dot" style="background:var(--c)"></span> C (31–50) <span id="cntC" class="bandCount">0/3</span></span>
@@ -193,20 +155,18 @@
         </span>
       </div>
 
-      <!-- Global controls -->
-      <div class="controls" style="margin-top:8px">
+      <!-- Controls -->
+      <div class="row" style="margin-top:10px">
         <button id="clearBtn">✕ Clear selections</button>
         <button id="copyBtn">⧉ Copy picks</button>
 
-        <!-- Team name + save -->
         <span class="row" style="margin-left:auto">
           <input id="teamName" type="text" placeholder="Your team name" style="min-width:220px" />
           <button id="saveTeamBtn">💾 Save team</button>
         </span>
       </div>
 
-      <!-- Filter + Budget + Admin -->
-      <div class="controls" style="margin-top:8px">
+      <div class="row" style="margin-top:8px">
         <label>
           Filter band:
           <select id="bandFilter">
@@ -220,24 +180,8 @@
         <div class="pill">Budget left: <span id="budget" style="margin-left:6px;font-weight:700">900M</span></div>
         <button id="adminBtn" class="row">🔒 Admin mode</button>
       </div>
-    </div>
-  </header>
 
-  <main class="wrap">
-    <!-- HOME (new landing page, simple blue background with FANTA / TENNIS) -->
-    <section id="view-home" class="section active" aria-label="Home">
-      <div class="hero">
-        <div class="hero-text">
-          <span>FANTA</span>
-          <span>TENNIS</span>
-        </div>
-        <div class="hero-sub">Open the menu ☰ to get started</div>
-      </div>
-    </section>
-
-    <!-- My Team (moved behind menu) -->
-    <section id="view-myteam" class="section" aria-label="My Team">
-      <h2 style="margin-top:16px">My Picks</h2>
+      <h3 style="margin:16px 0 6px">My Picks</h3>
       <div id="selected" class="grid" aria-live="polite"></div>
 
       <div id="status" class="sub" role="status" aria-live="polite"></div>
@@ -298,39 +242,33 @@
 
   <div id="toast" class="toast hide" role="alert"></div>
 
+  <!-- Update / SW bootstrap (ensures new versions appear everywhere) -->
   <script>
-    // ===== VERSIONED UPDATE / SW-CACHE REFRESH =====
-    const APP_VERSION = '2025.08.29-home-v1'; // bump this whenever you deploy new HTML/JS
+    const APP_VERSION = '2025.08.29.navfix-v2'; // bump on each deploy
 
     async function hardUpdate(reason='manual'){
       try{
-        // Clear CacheStorage
         const keys = await caches.keys();
         await Promise.all(keys.map(k => caches.delete(k)));
-        // Unregister all service workers
         if ('serviceWorker' in navigator){
           const regs = await navigator.serviceWorker.getRegistrations();
           await Promise.all(regs.map(r => r.unregister()));
         }
         localStorage.setItem('ft.appVersion', APP_VERSION);
-        showToast(`Updated (${reason}). Reloading…`);
       }catch(e){ console.error(e); }
-      setTimeout(()=> location.reload(), 400);
+      setTimeout(()=> location.reload(), 300);
     }
 
     (function bootstrapUpdates(){
       const prev = localStorage.getItem('ft.appVersion');
       if (prev !== APP_VERSION){
-        // New version detected: clear caches and re-register SW fresh
         hardUpdate('version change');
         return;
       }
-      // Normal SW registration with cache-busting query
       if ('serviceWorker' in navigator){
         window.addEventListener('load', async () => {
           try{
             const reg = await navigator.serviceWorker.register(`./service-worker.js?v=${encodeURIComponent(APP_VERSION)}`);
-            // periodic check for update
             setInterval(()=> reg.update().catch(()=>{}), 60*60*1000);
           }catch(e){ console.warn('SW registration failed', e); }
         });
@@ -340,7 +278,7 @@
 
   <script>
     // ===== CONFIG =====
-    const ADMIN_PIN = '123456'; // <<< change this for your deployment
+    const ADMIN_PIN = '123456'; // change for deployment
     const STORAGE_KEY_PICKS = 'ft.picks.v1';
     const STORAGE_KEY_TEAMS = 'ft.teams.v1';
     const STORAGE_KEY_LEAGUES = 'ft.leagues.v1';
@@ -350,7 +288,7 @@
     const MAX_PER_BAND = 3;
     const MAX_BUDGET = 900_000_000; // 900M total budget
 
-    // ---- Static Top 100 (ATP Singles — as of Aug 25, 2025) ----
+    // ---- Static Top 100 ----
     const PLAYERS = [
       {rank:1, name:"Jannik Sinner"},{rank:2, name:"Carlos Alcaraz"},{rank:3, name:"Alexander Zverev"},
       {rank:4, name:"Taylor Fritz"},{rank:5, name:"Jack Draper"},{rank:6, name:"Ben Shelton"},
@@ -391,12 +329,18 @@
     // ===== STATE =====
     let budget = MAX_BUDGET;
     const picks = JSON.parse(localStorage.getItem(STORAGE_KEY_PICKS) || '{"A":[],"B":[],"C":[],"D":[]}');
-    let teams = JSON.parse(localStorage.getItem(STORAGE_KEY_TEAMS) || '{"teams":{}}'); // {teams:{[name]:Team}}
-    let leagues = JSON.parse(localStorage.getItem(STORAGE_KEY_LEAGUES) || '{"leagues":{}}'); // {leagues:{[id]:League}}
+    let teams = JSON.parse(localStorage.getItem(STORAGE_KEY_TEAMS) || '{"teams":{}}');
+    let leagues = JSON.parse(localStorage.getItem(STORAGE_KEY_LEAGUES) || '{"leagues":{}}');
     let adminEnabled = JSON.parse(localStorage.getItem(STORAGE_KEY_ADMIN) || 'false');
     let myTeamName = localStorage.getItem(STORAGE_KEY_MYNAME) || '';
 
     // ===== ELTS =====
+    const $drawer = document.getElementById('drawer');
+    const $openDrawer = document.getElementById('openDrawer');
+    const $closeDrawer = document.getElementById('closeDrawer');
+    const $drawerBackdrop = document.getElementById('drawerBackdrop');
+    const $checkUpdateBtn = document.getElementById('checkUpdateBtn');
+
     const $grid = document.getElementById('grid');
     const $status = document.getElementById('status');
     const $toast = document.getElementById('toast');
@@ -424,589 +368,279 @@
     const $leagueName = document.getElementById('leagueName');
     const $createLeagueBtn = document.getElementById('createLeagueBtn');
 
-    // Drawer + nav
-    const $drawer = document.getElementById('drawer');
-    const $openDrawer = document.getElementById('openDrawer');
-    const $closeDrawer = document.getElementById('closeDrawer');
-    const $drawerBackdrop = document.getElementById('drawerBackdrop');
-    const navLinks = () => Array.from(document.querySelectorAll('.navlink'));
-    const $checkUpdateBtn = document.getElementById('checkUpdateBtn');
-
     // ===== UTILS =====
-    function bandFor(rank){
-      if (rank>=1 && rank<=10) return 'A';
-      if (rank>=11 && rank<=30) return 'B';
-      if (rank>=31 && rank<=50) return 'C';
-      return 'D';
-    }
-    function costFor(rank){ return (101 - rank) * 1_000_000; }
-    function formatM(n){ return (n/1_000_000) + 'M'; }
-    function escapeHTML(s){ return s.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
     function showToast(msg){
       $toast.textContent = msg;
       $toast.classList.remove('hide');
       clearTimeout(showToast._t);
       showToast._t = setTimeout(()=> $toast.classList.add('hide'), 2600);
     }
+    function bandFor(rank){ if (rank<=10) return 'A'; if (rank<=30) return 'B'; if (rank<=50) return 'C'; return 'D'; }
+    function costFor(rank){ return (101 - rank) * 1_000_000; }
+    function formatM(n){ return (n/1_000_000) + 'M'; }
+    function escapeHTML(s){ return s.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
     function isSelected(id){ return Object.values(picks).some(arr => arr.includes(id)); }
-    function calcSpentFromPicks(p){
-      return Object.values(p).flat()
-        .map(id => parseInt(id.split('|')[0],10))
-        .map(costFor)
-        .reduce((a,b)=>a+b, 0);
-    }
+    function calcSpentFromPicks(p){ return Object.values(p).flat().map(id => parseInt(id.split('|')[0],10)).map(costFor).reduce((a,b)=>a+b, 0); }
     function calcSpent(){ return calcSpentFromPicks(picks); }
-    function updateBudget(){
-      const spent = calcSpent();
-      budget = MAX_BUDGET - spent;
-      $budget.textContent = formatM(budget);
+    function updateBudget(){ const spent = calcSpent(); budget = MAX_BUDGET - spent; if ($budget) $budget.textContent = formatM(budget); }
+    function todayISO(){ return new Date().toISOString().slice(0,10); }
+    function idNow(){ return Math.random().toString(36).slice(2,10); }
+
+    // ===== NAV / DRAWER (robust) =====
+    function openDrawer(){ $drawer.classList.add('open'); $drawer.setAttribute('aria-hidden','false'); }
+    function closeDrawer(){ $drawer.classList.remove('open'); $drawer.setAttribute('aria-hidden','true'); }
+    $openDrawer.addEventListener('click', openDrawer);
+    $closeDrawer.addEventListener('click', closeDrawer);
+    $drawerBackdrop.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', (e)=>{ if (e.key==='Escape') closeDrawer(); });
+
+    function switchView(view){
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(`view-${view}`);
+      if (target) target.classList.add('active');
+      if (view==='myteam'){ renderFiltered(); updateCounters(); }
+      if (view==='teams'){ renderTeamsList(); }
+      if (view==='leagues'){ renderLeaguesList(); }
+      if (view==='stats'){ renderLeaderboard(); }
+      closeDrawer();
     }
+
+    // Explicitly wire menu buttons (fixes non-working burger on some setups)
+    document.querySelectorAll('.panel .navbtn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        if (btn.id === 'checkUpdateBtn'){ hardUpdate('manual'); return; }
+        const view = btn.getAttribute('data-view');
+        if (view) switchView(view);
+      });
+    });
+
+    // ===== MY TEAM interactions =====
     function updateCounters(){
-      $cntA.textContent = `${picks.A.length}/${MAX_PER_BAND}`;
-      $cntB.textContent = `${picks.B.length}/${MAX_PER_BAND}`;
-      $cntC.textContent = `${picks.C.length}/${MAX_PER_BAND}`;
-      $cntD.textContent = `${picks.D.length}/${MAX_PER_BAND}`;
+      if ($cntA){ $cntA.textContent = `${picks.A.length}/${MAX_PER_BAND}`; }
+      if ($cntB){ $cntB.textContent = `${picks.B.length}/${MAX_PER_BAND}`; }
+      if ($cntC){ $cntC.textContent = `${picks.C.length}/${MAX_PER_BAND}`; }
+      if ($cntD){ $cntD.textContent = `${picks.D.length}/${MAX_PER_BAND}`; }
       localStorage.setItem(STORAGE_KEY_PICKS, JSON.stringify(picks));
       updateBudget();
       renderSelected();
       updateStatus();
     }
-    function currentFilteredPlayers(){
-      const v = $bandFilter.value;
-      if (v === 'all') return PLAYERS;
-      return PLAYERS.filter(p => bandFor(p.rank) === v);
-    }
-    function idNow(){ return Math.random().toString(36).slice(2,10); }
-    function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
+    function currentFilteredPlayers(){ const v = ($bandFilter && $bandFilter.value) || 'all'; return v==='all'? PLAYERS : PLAYERS.filter(p => bandFor(p.rank)===v); }
 
-    // ===== RENDERERS =====
     function renderSelected(){
-      const $sel = document.getElementById('selected');
-      if (!$sel) return;
-      $sel.innerHTML = '';
+      const wrap = document.getElementById('selected');
+      if (!wrap) return;
+      wrap.innerHTML = '';
       const allSel = Object.values(picks).flat();
-      if (allSel.length === 0){
-        const empty = document.createElement('div');
-        empty.className = 'sub';
-        empty.textContent = 'No picks yet. Click players below to add them to your squad.';
-        $sel.appendChild(empty);
-        return;
-      }
-      const data = allSel.map(id => {
-        const [rankStr, name] = id.split('|');
-        const rank = parseInt(rankStr,10);
-        return {rank, name};
-      }).sort((a,b)=>a.rank-b.rank);
-
+      if (!allSel.length){ const d=document.createElement('div'); d.className='sub'; d.textContent='No picks yet. Click players below to add them to your squad.'; wrap.appendChild(d); return; }
+      const data = allSel.map(id => { const [r,name]=id.split('|'); return {rank:+r, name}; }).sort((a,b)=>a.rank-b.rank);
       for (const p of data){
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `
-          <div class="rank">${p.rank}</div>
-          <div style="flex:1;min-width:0">
-            <div class="name">${escapeHTML(p.name)}</div>
-            <div class="meta">Cost ${formatM(costFor(p.rank))} • Band ${bandFor(p.rank)}</div>
-          </div>
-        `;
-        $sel.appendChild(card);
+        card.innerHTML = `<div class="rank">${p.rank}</div>
+          <div style="flex:1;min-width:0"><div class="name">${escapeHTML(p.name)}</div>
+          <div class="meta">Cost ${formatM(costFor(p.rank))} • Band ${bandFor(p.rank)}</div></div>`;
+        wrap.appendChild(card);
       }
     }
 
     function render(players){
-      const $gridEl = document.getElementById('grid');
-      if (!$gridEl) return;
-      $gridEl.setAttribute('aria-busy','true');
-      $gridEl.innerHTML = '';
+      const grid = document.getElementById('grid');
+      if (!grid) return;
+      grid.setAttribute('aria-busy','true');
+      grid.innerHTML = '';
       for (const p of players){
         const band = bandFor(p.rank);
         const id = `${p.rank}|${p.name}`;
         const selected = isSelected(id);
-
         const card = document.createElement('button');
-        card.type = 'button';
-        card.className = 'card' + (selected ? ' sel' : '');
-        card.setAttribute('data-id', id);
-        card.setAttribute('data-band', band);
-        card.setAttribute('data-rank', String(p.rank));
+        card.type='button'; card.className='card' + (selected?' sel':'');
+        card.dataset.id=id; card.dataset.band=band; card.dataset.rank=String(p.rank);
         card.setAttribute('aria-pressed', selected ? 'true' : 'false');
         card.title = selected ? 'Click to remove from picks' : 'Click to add to picks';
-
-        card.innerHTML = `
-          <div class="rank">${p.rank}</div>
-          <div style="flex:1;min-width:0">
-            <div class="name">${escapeHTML(p.name)}</div>
-            <div class="meta">Cost ${formatM(costFor(p.rank))}</div>
-          </div>
-          <div class="tag ${band}" aria-hidden="true">${band}</div>
-        `;
-        $gridEl.appendChild(card);
+        card.innerHTML = `<div class="rank">${p.rank}</div>
+          <div style="flex:1;min-width:0"><div class="name">${escapeHTML(p.name)}</div>
+          <div class="meta">Cost ${formatM(costFor(p.rank))}</div></div>
+          <div class="tag ${band}" aria-hidden="true">${band}</div>`;
+        grid.appendChild(card);
       }
-      $gridEl.setAttribute('aria-busy','false');
+      grid.setAttribute('aria-busy','false');
       updateStatus();
     }
 
     function updateStatus(){
-      const v = $bandFilter.value;
-      const $statusEl = document.getElementById('status');
-      if (!$statusEl) return;
-      const map = {all:'All', A:'Band A (1–10)', B:'Band B (11–30)', C:'Band C (31–50)', D:'Band D (51–100)'};
-      const showing = currentFilteredPlayers().length;
-      $statusEl.textContent = `Showing ${showing} players • Filter: ${map[v]} • Budget left: ${formatM(budget)}. Click a player to add/remove (max ${MAX_PER_BAND} per band).`;
+      const status = document.getElementById('status');
+      if (!status) return;
+      const v = ($bandFilter && $bandFilter.value) || 'all';
+      const map = {all:'All',A:'Band A (1–10)',B:'Band B (11–30)',C:'Band C (31–50)',D:'Band D (51–100)'};
+      status.textContent = `Showing ${currentFilteredPlayers().length} players • Filter: ${map[v]} • Budget left: ${formatM(budget)}. Click a player to add/remove (max ${MAX_PER_BAND} per band).`;
     }
 
     function renderFiltered(){ render(currentFilteredPlayers()); }
 
-    // ===== NAV / DRAWER =====
-    function setActiveNav(view){
-      navLinks().forEach(b => b.classList.toggle('active', b.dataset.view===view));
-    }
-    function switchView(view){
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      const target = document.getElementById(`view-${view}`);
-      if (target) target.classList.add('active');
-      setActiveNav(view);
-      if (view==='teams'){ renderTeamsList(); }
-      if (view==='leagues'){ renderLeaguesList(); }
-      if (view==='stats'){ renderLeaderboard(); }
-      if (view==='myteam'){ renderFiltered(); updateCounters(); }
-      closeDrawer();
-    }
-    function openDrawer(){ $drawer.classList.add('open'); $drawer.setAttribute('aria-hidden','false'); }
-    function closeDrawer(){ $drawer.classList.remove('open'); $drawer.setAttribute('aria-hidden','true'); }
-
-    $openDrawer.addEventListener('click', openDrawer);
-    $closeDrawer.addEventListener('click', closeDrawer);
-    $drawerBackdrop.addEventListener('click', closeDrawer);
-    document.addEventListener('keydown', (e)=>{ if (e.key==='Escape') closeDrawer(); });
-    document.addEventListener('click', (e)=>{
-      const btn = e.target.closest('.navlink');
-      if (!btn) return;
-      const view = btn.dataset.view;
-      if (view) switchView(view);
-    });
-
-    // ===== INTERACTIONS (My Team) =====
     if ($bandFilter) $bandFilter.addEventListener('change', renderFiltered);
 
     if ($grid) $grid.addEventListener('click', (e) => {
-      const btn = e.target.closest('button.card');
-      if (!btn) return;
-
-      const id = btn.getAttribute('data-id');
-      const band = btn.getAttribute('data-band');
-      const rank = parseInt(btn.getAttribute('data-rank'),10);
-      const cost = costFor(rank);
-
-      if (isSelected(id)){
-        picks[band] = picks[band].filter(x => x !== id);
-        showToast('Removed from picks.');
-      } else {
-        if (picks[band].length >= MAX_PER_BAND){
-          showToast(`Band ${band} is full (max ${MAX_PER_BAND}).`);
-          return;
-        }
-        if (budget - cost < 0){
-          showToast('Not enough budget for this player.');
-          return;
-        }
-        picks[band].push(id);
-        showToast('Added to picks!');
+      const btn = e.target.closest('button.card'); if (!btn) return;
+      const id = btn.dataset.id; const band = btn.dataset.band; const rank = +btn.dataset.rank; const cost = costFor(rank);
+      if (isSelected(id)){ picks[band] = picks[band].filter(x => x !== id); showToast('Removed from picks.'); }
+      else{
+        if (picks[band].length >= MAX_PER_BAND){ showToast(`Band ${band} is full (max ${MAX_PER_BAND}).`); return; }
+        if (budget - cost < 0){ showToast('Not enough budget for this player.'); return; }
+        picks[band].push(id); showToast('Added to picks!');
       }
-      updateCounters();
-      renderFiltered();
+      updateCounters(); renderFiltered();
     });
 
     const $clearBtn = document.getElementById('clearBtn');
-    if ($clearBtn) $clearBtn.addEventListener('click', () => {
-      if (!Object.values(picks).some(arr => arr.length)) return;
-      picks.A = []; picks.B = []; picks.C = []; picks.D = [];
-      updateCounters();
-      renderFiltered();
-      showToast('All selections cleared.');
-    });
+    if ($clearBtn) $clearBtn.addEventListener('click', ()=>{ if (!Object.values(picks).some(a=>a.length)) return; picks.A=[];picks.B=[];picks.C=[];picks.D=[]; updateCounters(); renderFiltered(); showToast('All selections cleared.'); });
 
     const $copyBtn = document.getElementById('copyBtn');
-    if ($copyBtn) $copyBtn.addEventListener('click', async () => {
-      const spent = calcSpent();
-      const left = MAX_BUDGET - spent;
-      function lineFor(band){
-        const label = {A:'A (1–10)',B:'B (11–30)',C:'C (31–50)',D:'D (51–100)'}[band];
-        if (!picks[band].length) return `${label}: —`;
-        const parts = picks[band].map(id => {
-          const [r, n] = id.split('|');
-          return `${r} ${n} (${formatM(costFor(parseInt(r,10)))})`;
-        }).join(', ');
+    if ($copyBtn) $copyBtn.addEventListener('click', async ()=>{
+      const spent = calcSpent(); const left = MAX_BUDGET - spent;
+      function lineFor(b){ const label={A:'A (1–10)',B:'B (11–30)',C:'C (31–50)',D:'D (51–100)'}[b];
+        if (!picks[b].length) return `${label}: —`;
+        const parts = picks[b].map(id => { const [r,n]=id.split('|'); return `${r} ${n} (${formatM(costFor(+r))})`; }).join(', ');
         return `${label}: ${parts}`;
       }
-      const text = [
-        'FantaTennis — My Picks (ATP snapshot Aug 25, 2025)',
-        lineFor('A'), lineFor('B'), lineFor('C'), lineFor('D'),
-        `Total spent: ${formatM(spent)}`,
-        `Budget left: ${formatM(left)}`
-      ].join('\n');
+      const text = ['FantaTennis — My Picks (ATP snapshot Aug 25, 2025)', lineFor('A'), lineFor('B'), lineFor('C'), lineFor('D'), `Total spent: ${formatM(spent)}`, `Budget left: ${formatM(left)}`].join('\n');
       try{ await navigator.clipboard.writeText(text); showToast('Picks copied to clipboard.'); }
-      catch{
-        const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
-        ta.select(); try{ document.execCommand('copy'); showToast('Picks copied to clipboard.'); }
-        catch{ showToast('Copy failed.'); }
-        finally{ document.body.removeChild(ta); }
-      }
+      catch{ showToast('Copy failed.'); }
     });
 
-    // ===== TEAMS (Option A – local + import/export) =====
-    function getTotalPoints(team){
-      return (team.results || []).reduce((a,r)=> a + (Number(r.points)||0), 0);
-    }
-    function ensureTeamsShape(){
-      if (!teams || typeof teams !== 'object' || !teams.teams) teams = {teams:{}};
-    }
-    function saveTeams(){
-      ensureTeamsShape();
-      localStorage.setItem(STORAGE_KEY_TEAMS, JSON.stringify(teams));
-    }
-    function upsertTeam(name, teamObj){
-      ensureTeamsShape();
-      teams.teams[name] = teamObj;
-      saveTeams();
-    }
-    function teamExists(name){
-      return !!(teams.teams && teams.teams[name]);
-    }
-    function buildTeamFromCurrent(name){
-      return {
-        name,
-        picks: JSON.parse(JSON.stringify(picks)),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        results: teams.teams[name]?.results || [] // keep scoring history if updating
-      };
-    }
+    // ===== TEAMS / RESULTS =====
+    function ensureTeamsShape(){ if (!teams || typeof teams!=='object' || !teams.teams) teams={teams:{}}; }
+    function saveTeams(){ ensureTeamsShape(); localStorage.setItem(STORAGE_KEY_TEAMS, JSON.stringify(teams)); }
+    function upsertTeam(name, obj){ ensureTeamsShape(); teams.teams[name]=obj; saveTeams(); }
+    function teamExists(name){ return !!(teams.teams && teams.teams[name]); }
+    function buildTeamFromCurrent(name){ return { name, picks: JSON.parse(JSON.stringify(picks)), createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(), results: teams.teams[name]?.results || [] }; }
+    function getTotalPoints(team){ return (team.results||[]).reduce((a,r)=> a + (Number(r.points)||0), 0); }
+
+    const $saveTeamBtnEl = document.getElementById('saveTeamBtn');
+    if ($saveTeamBtnEl) $saveTeamBtnEl.addEventListener('click', ()=>{
+      const name = ($teamName.value||'').trim(); if (!name){ showToast('Enter a team name.'); return; }
+      if (teamExists(name) && !confirm('Team exists. Update with current picks?')) return;
+      const team = buildTeamFromCurrent(name); upsertTeam(name, team); myTeamName=name; localStorage.setItem(STORAGE_KEY_MYNAME, myTeamName);
+      renderTeamsList(); renderLeaderboard(); renderLeaguesList(); showToast('Team saved.');
+    });
+
+    const $exportTeamsBtnEl = document.getElementById('exportTeamsBtn');
+    if ($exportTeamsBtnEl) $exportTeamsBtnEl.addEventListener('click', async ()=>{ const payload=JSON.stringify(teams,null,2); try{ await navigator.clipboard.writeText(payload); showToast('Teams JSON copied.'); }catch{ showToast('Copy failed.'); }});
+    const $importTeamsBtnEl = document.getElementById('importTeamsBtn');
+    if ($importTeamsBtnEl) $importTeamsBtnEl.addEventListener('click', ()=>{ $importArea.classList.remove('hide'); });
+    if ($cancelImportBtn) $cancelImportBtn.addEventListener('click', ()=>{ $importArea.classList.add('hide'); $importTextarea.value=''; });
+    if ($confirmImportBtn) $confirmImportBtn.addEventListener('click', ()=>{
+      let obj; try{ obj = JSON.parse($importTextarea.value); }catch{ showToast('Invalid JSON.'); return; }
+      if (!obj || typeof obj!=='object' || !obj.teams){ showToast('JSON must be {"teams":{...}}'); return; }
+      let added=0, skipped=0; ensureTeamsShape();
+      for (const [name, team] of Object.entries(obj.teams)){ if (teams.teams[name]){ skipped++; continue; }
+        team.name=name; team.results=Array.isArray(team.results)?team.results:[]; teams.teams[name]=team; added++; }
+      saveTeams(); renderTeamsList(); renderLeaderboard(); renderLeaguesList();
+      showToast(`Import: ${added} added, ${skipped} skipped.`); $importArea.classList.add('hide'); $importTextarea.value='';
+    });
+
+    // Admin
+    function updateAdminUI(){ const b=document.getElementById('adminBtn'); if (b) b.textContent = adminEnabled ? '✅ Admin ON' : '🔒 Admin mode'; renderTeamsList(); renderLeaguesList(); }
+    if ($adminBtn) $adminBtn.addEventListener('click', ()=>{
+      if (adminEnabled){ adminEnabled=false; localStorage.setItem(STORAGE_KEY_ADMIN,'false'); updateAdminUI(); showToast('Admin disabled.'); return; }
+      const pin = prompt('Enter admin PIN'); if (pin==='123456'){ adminEnabled=true; localStorage.setItem(STORAGE_KEY_ADMIN,'true'); updateAdminUI(); showToast('Admin enabled.'); } else showToast('Incorrect PIN.');
+    });
+
+    // Teams list
     function renderTeamsList(){
       ensureTeamsShape();
-      const all = Object.values(teams.teams);
-      const container = $teamsList;
-      container.innerHTML = '';
-      if (!all.length){
-        const p = document.createElement('p');
-        p.className = 'sub';
-        p.textContent = 'No teams saved yet. Save your team from the header to add it here.';
-        container.appendChild(p);
-        return;
-      }
+      const container = $teamsList; if (!container) return;
+      const all = Object.values(teams.teams); container.innerHTML='';
+      if (!all.length){ const p=document.createElement('p'); p.className='sub'; p.textContent='No teams yet.'; container.appendChild(p); return; }
       all.sort((a,b)=> getTotalPoints(b)-getTotalPoints(a) || a.name.localeCompare(b.name));
       for (const t of all){
-        const wrapper = document.createElement('div');
-        wrapper.className = 'card';
-        wrapper.style.flexDirection='column';
-        wrapper.style.alignItems='stretch';
-
-        const head = document.createElement('div');
-        head.className = 'row';
-        head.style.justifyContent='space-between';
-        head.innerHTML = `
-          <div style="font-weight:800">${escapeHTML(t.name)}</div>
-          <div class="sub">Points: <b>${getTotalPoints(t)}</b> • Spent: <b>${formatM(calcSpentFromPicks(t.picks))}</b></div>
-        `;
-
-        const picksDiv = document.createElement('div');
-        picksDiv.className = 'sub';
-        function fmtBand(b){
-          const label = {A:'A',B:'B',C:'C',D:'D'}[b];
-          const list = (t.picks[b]||[]).map(id => id.split('|')[1]).join(', ') || '—';
-          return `<span><b>${label}:</b> ${escapeHTML(list)}</span>`;
-        }
+        const wrap=document.createElement('div'); wrap.className='card'; wrap.style.flexDirection='column'; wrap.style.alignItems='stretch';
+        const head=document.createElement('div'); head.className='row'; head.style.justifyContent='space-between';
+        head.innerHTML = `<div style="font-weight:800">${escapeHTML(t.name)}</div><div class="sub">Points: <b>${getTotalPoints(t)}</b> • Spent: <b>${formatM(calcSpentFromPicks(t.picks))}</b></div>`;
+        const picksDiv=document.createElement('div'); picksDiv.className='sub';
+        function fmtBand(b){ const label={A:'A',B:'B',C:'C',D:'D'}[b]; const list=(t.picks[b]||[]).map(id=>id.split('|')[1]).join(', ')||'—'; return `<span><b>${label}:</b> ${escapeHTML(list)}</span>`; }
         picksDiv.innerHTML = `<div class="row" style="gap:14px">${fmtBand('A')} ${fmtBand('B')} ${fmtBand('C')} ${fmtBand('D')}</div>`;
-
-        // Score history table
-        const table = document.createElement('table');
-        table.className = 'table';
-        const rows = (t.results||[]).slice().sort((a,b)=> (b.date||'').localeCompare(a.date||''));
-        table.innerHTML = `
-          <thead><tr><th style="width:40%">Tournament</th><th style="width:20%">Date</th><th style="width:20%">Points</th><th style="width:20%"></th></tr></thead>
-          <tbody>
-            ${rows.map(r => `
-              <tr data-id="${r.id}">
-                <td>${escapeHTML(r.tournament||'')}</td>
-                <td>${escapeHTML(r.date||'')}</td>
-                <td>${Number(r.points)||0}</td>
-                <td>${adminEnabled ? `<button data-action="del" data-team="${encodeURIComponent(t.name)}" data-res="${r.id}">Delete</button>` : ''}</td>
-              </tr>
-            `).join('')}
-            ${rows.length===0 ? `<tr><td colspan="4" class="sub">No results yet.</td></tr>`:''}
-          </tbody>
-        `;
-
-        // Add result (admins only)
-        const form = document.createElement('div');
-        form.className = 'row';
-        form.style.marginTop='8px';
-        form.innerHTML = `
-          <input type="text" placeholder="Tournament name" data-field="tournament" ${!adminEnabled?'disabled':''} />
+        const table=document.createElement('table'); table.className='table';
+        const rows=(t.results||[]).slice().sort((a,b)=> (b.date||'').localeCompare(a.date||'')); 
+        table.innerHTML = `<thead><tr><th style="width:40%">Tournament</th><th style="width:20%">Date</th><th style="width:20%">Points</th><th style="width:20%"></th></tr></thead>
+          <tbody>${rows.map(r=>`<tr data-id="${r.id}"><td>${escapeHTML(r.tournament||'')}</td><td>${escapeHTML(r.date||'')}</td><td>${Number(r.points)||0}</td><td>${adminEnabled?`<button data-action="del" data-team="${encodeURIComponent(t.name)}" data-res="${r.id}">Delete</button>`:''}</td></tr>`).join('')}
+          ${rows.length? '' : `<tr><td colspan="4" class="sub">No results yet.</td></tr>`}</tbody>`;
+        const form=document.createElement('div'); form.className='row'; form.style.marginTop='8px';
+        form.innerHTML = `<input type="text" placeholder="Tournament name" data-field="tournament" ${!adminEnabled?'disabled':''} />
           <input type="number" placeholder="Points" data-field="points" min="0" step="1" ${!adminEnabled?'disabled':''} />
           <input type="date" data-field="date" value="${todayISO()}" ${!adminEnabled?'disabled':''} />
-          <button data-action="addResult" data-team="${encodeURIComponent(t.name)}" ${!adminEnabled?'disabled':''}>Add Result</button>
-          ${!adminEnabled? '<span class="sub">Admin mode required</span>':''}
-        `;
-
-        wrapper.appendChild(head);
-        wrapper.appendChild(picksDiv);
-        wrapper.appendChild(table);
-        wrapper.appendChild(form);
-        container.appendChild(wrapper);
+          <button data-action="addResult" data-team="${encodeURIComponent(t.name)}" ${!adminEnabled?'disabled':''}>Add Result</button> ${!adminEnabled?'<span class="sub">Admin mode required</span>':''}`;
+        wrap.appendChild(head); wrap.appendChild(picksDiv); wrap.appendChild(table); wrap.appendChild(form); container.appendChild(wrap);
       }
-
-      // Table button wiring (delete/add)
       container.querySelectorAll('button[data-action="del"]').forEach(btn=>{
         btn.addEventListener('click', ()=>{
           if (!adminEnabled){ showToast('Admin only.'); return; }
-          const teamName = decodeURIComponent(btn.getAttribute('data-team'));
-          const resId = btn.getAttribute('data-res');
-          const team = teams.teams[teamName];
-          if (!team) return;
-          team.results = (team.results||[]).filter(r => r.id !== resId);
-          team.updatedAt = new Date().toISOString();
-          upsertTeam(teamName, team);
-          renderTeamsList(); renderLeaderboard(); renderLeaguesList();
-          showToast('Result removed.');
+          const teamName=decodeURIComponent(btn.getAttribute('data-team')); const resId=btn.getAttribute('data-res');
+          const team=teams.teams[teamName]; if (!team) return;
+          team.results=(team.results||[]).filter(r=>r.id!==resId); team.updatedAt=new Date().toISOString(); upsertTeam(teamName, team);
+          renderTeamsList(); renderLeaderboard(); renderLeaguesList(); showToast('Result removed.');
         });
       });
       container.querySelectorAll('button[data-action="addResult"]').forEach(btn=>{
         btn.addEventListener('click', ()=>{
           if (!adminEnabled){ showToast('Admin only.'); return; }
-          const card = btn.closest('.card');
-          const teamName = decodeURIComponent(btn.getAttribute('data-team'));
-          const team = teams.teams[teamName];
-          const tournament = card.querySelector('input[data-field="tournament"]').value.trim();
-          const points = Number(card.querySelector('input[data-field="points"]').value);
-          const date = card.querySelector('input[data-field="date"]').value || todayISO();
+          const card=btn.closest('.card'); const teamName=decodeURIComponent(btn.getAttribute('data-team')); const team=teams.teams[teamName];
+          const tournament=card.querySelector('input[data-field="tournament"]').value.trim();
+          const points=Number(card.querySelector('input[data-field="points"]').value);
+          const date=card.querySelector('input[data-field="date"]').value || todayISO();
           if (!tournament){ showToast('Tournament name required.'); return; }
           if (isNaN(points)){ showToast('Points must be a number.'); return; }
-          team.results = team.results || [];
-          team.results.push({id:idNow(), tournament, points, date});
-          team.updatedAt = new Date().toISOString();
-          upsertTeam(teamName, team);
-          renderTeamsList(); renderLeaderboard(); renderLeaguesList();
-          showToast('Result added.');
+          team.results=team.results||[]; team.results.push({id:idNow(), tournament, points, date}); team.updatedAt=new Date().toISOString();
+          upsertTeam(teamName, team); renderTeamsList(); renderLeaderboard(); renderLeaguesList(); showToast('Result added.');
         });
       });
     }
 
-    // Save team from header
-    $saveTeamBtn.addEventListener('click', ()=>{
-      const name = ($teamName.value || '').trim();
-      if (!name){ showToast('Enter a team name.'); return; }
-      if (teamExists(name)){
-        if (!confirm('Team name already exists. Update that team with your current picks?')) return;
-      }
-      const team = buildTeamFromCurrent(name);
-      upsertTeam(name, team);
-      myTeamName = name;
-      localStorage.setItem(STORAGE_KEY_MYNAME, myTeamName);
-      renderTeamsList(); renderLeaderboard(); renderLeaguesList();
-      showToast('Team saved.');
-    });
-
-    // Export/Import
-    $exportTeamsBtn.addEventListener('click', async ()=>{
-      const payload = JSON.stringify(teams, null, 2);
-      try{ await navigator.clipboard.writeText(payload); showToast('Teams JSON copied to clipboard.'); }
-      catch{
-        const ta=document.createElement('textarea'); ta.value=payload; document.body.appendChild(ta);
-        ta.select(); try{ document.execCommand('copy'); showToast('Teams JSON copied.'); }
-        catch{ showToast('Copy failed.'); }
-        finally{ document.body.removeChild(ta); }
-      }
-    });
-    $importTeamsBtn.addEventListener('click', ()=>{ $importArea.classList.remove('hide'); });
-    $cancelImportBtn.addEventListener('click', ()=>{ $importArea.classList.add('hide'); $importTextarea.value=''; });
-    $confirmImportBtn.addEventListener('click', ()=>{
-      let obj;
-      try{ obj = JSON.parse($importTextarea.value); }catch(e){ showToast('Invalid JSON.'); return; }
-      if (!obj || typeof obj!=='object' || !obj.teams){ showToast('JSON must be of shape {"teams":{...}}'); return; }
-      const incoming = obj.teams;
-      ensureTeamsShape();
-      let added=0, skipped=0;
-      for (const [name, team] of Object.entries(incoming)){
-        if (teams.teams[name]){ skipped++; continue; }
-        team.name = name;
-        team.results = Array.isArray(team.results)? team.results : [];
-        teams.teams[name]=team; added++;
-      }
-      saveTeams();
-      renderTeamsList(); renderLeaderboard(); renderLeaguesList();
-      showToast(`Import complete: ${added} added, ${skipped} skipped.`);
-      $importArea.classList.add('hide'); $importTextarea.value='';
-    });
-
-    // ===== ADMIN MODE =====
-    function updateAdminUI(){
-      $adminBtn.textContent = adminEnabled ? '✅ Admin ON' : '🔒 Admin mode';
-      renderTeamsList(); renderLeaguesList();
-    }
-    $adminBtn.addEventListener('click', ()=>{
-      if (adminEnabled){
-        adminEnabled = false;
-        localStorage.setItem(STORAGE_KEY_ADMIN, JSON.stringify(adminEnabled));
-        updateAdminUI(); showToast('Admin disabled.'); return;
-      }
-      const pin = prompt('Enter admin PIN');
-      if (pin === ADMIN_PIN){
-        adminEnabled = true;
-        localStorage.setItem(STORAGE_KEY_ADMIN, JSON.stringify(adminEnabled));
-        updateAdminUI(); showToast('Admin enabled.');
-      } else { showToast('Incorrect PIN.'); }
-    });
-
-    // ===== LEAGUES =====
-    function ensureLeaguesShape(){
-      if (!leagues || typeof leagues !== 'object' || !leagues.leagues) leagues = {leagues:{}};
-    }
+    // Leagues
+    function ensureLeaguesShape(){ if (!leagues || typeof leagues!=='object' || !leagues.leagues) leagues={leagues:{}}; }
     function saveLeagues(){ ensureLeaguesShape(); localStorage.setItem(STORAGE_KEY_LEAGUES, JSON.stringify(leagues)); }
-    function createLeague(name){
-      const id = idNow();
-      const inviteCode = Math.random().toString(36).slice(2,8).toUpperCase();
-      leagues.leagues[id] = {id, name, inviteCode, createdAt:new Date().toISOString(), members:[]};
-      saveLeagues();
-      return leagues.leagues[id];
-    }
-    function findLeagueByCode(code){
-      ensureLeaguesShape();
-      code = (code||'').trim().toUpperCase();
-      return Object.values(leagues.leagues).find(l => l.inviteCode.toUpperCase()===code);
-    }
+    function createLeague(name){ const id=idNow(); const inviteCode=Math.random().toString(36).slice(2,8).toUpperCase(); leagues.leagues[id]={id,name,inviteCode,createdAt:new Date().toISOString(),members:[]}; saveLeagues(); return leagues.leagues[id]; }
+    function findLeagueByCode(code){ ensureLeaguesShape(); code=(code||'').trim().toUpperCase(); return Object.values(leagues.leagues).find(l => l.inviteCode.toUpperCase()===code); }
     function renderLeaguesList(){
-      ensureLeaguesShape();
-      const container = $leaguesList;
-      container.innerHTML = '';
-      const all = Object.values(leagues.leagues);
-      if (!all.length){
-        const p = document.createElement('p');
-        p.className = 'sub';
-        p.textContent = 'No leagues yet. Admins can create one above.';
-        container.appendChild(p);
-        return;
-      }
+      ensureLeaguesShape(); const container=$leaguesList; if (!container) return; container.innerHTML='';
+      const all=Object.values(leagues.leagues); if (!all.length){ const p=document.createElement('p'); p.className='sub'; p.textContent='No leagues yet.'; container.appendChild(p); return; }
       all.sort((a,b)=> (a.createdAt||'').localeCompare(b.createdAt||''));
       for (const L of all){
-        const wrap = document.createElement('div');
-        wrap.className='card';
-        wrap.style.flexDirection='column';
-        wrap.style.alignItems='stretch';
-
-        const memberTeams = (L.members||[])
-          .map(name => teams.teams[name])
-          .filter(Boolean)
-          .sort((a,b)=> getTotalPoints(b)-getTotalPoints(a) || a.name.localeCompare(b.name));
-
-        const table = `
-          <table class="table">
-            <thead><tr><th style="width:5%">#</th><th style="width:45%">Team</th><th style="width:25%">Total Points</th><th style="width:25%">Spent</th></tr></thead>
-            <tbody>
-              ${memberTeams.map((t,i)=>`
-                <tr><td>${i+1}</td><td>${escapeHTML(t.name)}</td><td>${getTotalPoints(t)}</td><td>${formatM(calcSpentFromPicks(t.picks))}</td></tr>
-              `).join('')}
-              ${memberTeams.length===0? `<tr><td colspan="4" class="sub">No members yet.</td></tr>`: ''}
-            </tbody>
-          </table>`;
-
-        wrap.innerHTML = `
-          <div class="row" style="justify-content:space-between;align-items:center">
-            <div>
-              <div style="font-weight:800">${escapeHTML(L.name)}</div>
-              <div class="sub">Invite code: <code class="kbd">${L.inviteCode}</code></div>
-            </div>
-            <div class="row">
-              <button data-action="copyCode" data-code="${L.inviteCode}">Copy code</button>
-              ${adminEnabled? `<button data-action="deleteLeague" data-id="${L.id}">Delete</button>`:''}
-            </div>
-          </div>
-          <div style="margin-top:8px">${table}</div>
-        `;
+        const wrap=document.createElement('div'); wrap.className='card'; wrap.style.flexDirection='column'; wrap.style.alignItems='stretch';
+        const memberTeams=(L.members||[]).map(n=>teams.teams[n]).filter(Boolean).sort((a,b)=> getTotalPoints(b)-getTotalPoints(a) || a.name.localeCompare(b.name));
+        const table=`<table class="table"><thead><tr><th style="width:5%">#</th><th style="width:45%">Team</th><th style="width:25%">Total Points</th><th style="width:25%">Spent</th></tr></thead>
+          <tbody>${memberTeams.map((t,i)=>`<tr><td>${i+1}</td><td>${escapeHTML(t.name)}</td><td>${getTotalPoints(t)}</td><td>${formatM(calcSpentFromPicks(t.picks))}</td></tr>`).join('')}
+          ${memberTeams.length? '' : `<tr><td colspan="4" class="sub">No members yet.</td></tr>`}</tbody></table>`;
+        wrap.innerHTML = `<div class="row" style="justify-content:space-between;align-items:center">
+            <div><div style="font-weight:800">${escapeHTML(L.name)}</div><div class="sub">Invite code: <code class="kbd">${L.inviteCode}</code></div></div>
+            <div class="row"><button data-action="copyCode" data-code="${L.inviteCode}">Copy code</button>${adminEnabled?`<button data-action="deleteLeague" data-id="${L.id}">Delete</button>`:''}</div>
+          </div><div style="margin-top:8px">${table}</div>`;
         container.appendChild(wrap);
       }
-      container.querySelectorAll('button[data-action="copyCode"]').forEach(b=>{
-        b.addEventListener('click', async ()=>{
-          const code = b.getAttribute('data-code');
-          try{ await navigator.clipboard.writeText(code); showToast('Invite code copied.'); }
-          catch{ showToast('Copy failed.'); }
-        });
-      });
-      container.querySelectorAll('button[data-action="deleteLeague"]').forEach(b=>{
-        b.addEventListener('click', ()=>{
-          if (!adminEnabled){ showToast('Admin only.'); return; }
-          const id = b.getAttribute('data-id');
-          if (!confirm('Delete this league?')) return;
-          delete leagues.leagues[id];
-          saveLeagues(); renderLeaguesList(); showToast('League deleted.');
-        });
-      });
+      container.querySelectorAll('button[data-action="copyCode"]').forEach(b=> b.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(b.dataset.code); showToast('Invite code copied.'); }catch{ showToast('Copy failed.'); }}));
+      container.querySelectorAll('button[data-action="deleteLeague"]').forEach(b=> b.addEventListener('click', ()=>{ if (!adminEnabled){ showToast('Admin only.'); return; } const id=b.dataset.id; if(!confirm('Delete this league?')) return; delete leagues.leagues[id]; saveLeagues(); renderLeaguesList(); showToast('League deleted.'); }));
     }
+    if ($createLeagueBtn) $createLeagueBtn.addEventListener('click', ()=>{ if (!adminEnabled){ showToast('Admin only.'); return; } const name=($leagueName.value||'').trim(); if(!name){ showToast('League name required.'); return; } const L=createLeague(name); $leagueName.value=''; renderLeaguesList(); showToast(`League created. Code: ${L.inviteCode}`); });
+    if ($joinLeagueBtn) $joinLeagueBtn.addEventListener('click', ()=>{ const code=($joinCode.value||'').trim().toUpperCase(); if(!code){ showToast('Enter invite code.'); return; } if(!myTeamName || !teams.teams[myTeamName]){ showToast('Save your team first.'); return; } const L=findLeagueByCode(code); if(!L){ showToast('League not found.'); return; } if(!L.members) L.members=[]; if(L.members.includes(myTeamName)){ showToast('Team already in league.'); return; } L.members.push(myTeamName); saveLeagues(); $joinCode.value=''; renderLeaguesList(); showToast('Joined league!'); });
 
-    $createLeagueBtn.addEventListener('click', ()=>{
-      if (!adminEnabled){ showToast('Admin only.'); return; }
-      const name = ($leagueName.value||'').trim();
-      if (!name){ showToast('League name required.'); return; }
-      const L = createLeague(name);
-      $leagueName.value='';
-      renderLeaguesList();
-      showToast(`League created. Code: ${L.inviteCode}`);
-    });
-
-    $joinLeagueBtn.addEventListener('click', ()=>{
-      const code = ($joinCode.value||'').trim().toUpperCase();
-      if (!code){ showToast('Enter invite code.'); return; }
-      if (!myTeamName || !teams.teams[myTeamName]){ showToast('Save your team first (top right).'); return; }
-      const L = findLeagueByCode(code);
-      if (!L){ showToast('League not found.'); return; }
-      if (!L.members) L.members=[];
-      if (L.members.includes(myTeamName)){ showToast('Your team is already in this league.'); return; }
-      L.members.push(myTeamName);
-      saveLeagues();
-      $joinCode.value='';
-      renderLeaguesList();
-      showToast('Joined league!');
-    });
-
-    // ===== STATS =====
+    // Stats
     function renderLeaderboard(){
-      const tbody = document.querySelector('#leaderboard tbody');
-      if (!tbody){ return; }
-      tbody.innerHTML = '';
-      const all = Object.values(teams.teams || {});
-      if (!all.length){
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td colspan="4" class="sub">No teams yet.</td>`;
-        tbody.appendChild(tr);
-        return;
-      }
+      const tbody=document.querySelector('#leaderboard tbody'); if (!tbody) return; tbody.innerHTML='';
+      const all=Object.values(teams.teams||{}); if (!all.length){ const tr=document.createElement('tr'); tr.innerHTML='<td colspan="4" class="sub">No teams yet.</td>'; tbody.appendChild(tr); return; }
       all.sort((a,b)=> getTotalPoints(b)-getTotalPoints(a) || a.name.localeCompare(b.name));
-      all.forEach((t,i)=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${i+1}</td><td>${escapeHTML(t.name)}</td><td>${getTotalPoints(t)}</td><td>${formatM(calcSpentFromPicks(t.picks))}</td>`;
-        tbody.appendChild(tr);
-      });
+      all.forEach((t,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${escapeHTML(t.name)}</td><td>${getTotalPoints(t)}</td><td>${formatM(calcSpentFromPicks(t.picks))}</td>`; tbody.appendChild(tr); });
     }
 
-    // ===== UPDATE BUTTON =====
-    $checkUpdateBtn.addEventListener('click', ()=> hardUpdate('manual'));
-
-    // ===== INIT =====
-    function ensureLeaguesShape(){ if (!leagues || typeof leagues!=='object' || !leagues.leagues) leagues={leagues:{}}; }
-    ensureLeaguesShape();
-    if (!Object.keys(leagues.leagues).length){
-      createLeague('Global League'); // default
-    }
-    function updateAdminUIInit(){ $adminBtn.textContent = adminEnabled ? '✅ Admin ON' : '🔒 Admin mode'; }
-    updateAdminUIInit();
-
-    // Ensure budget label starts at the correct value
-    $budget.textContent = formatM(budget);
-    updateCounters();    // sets counters, budget, selected section, status
-    // Default landing is HOME now
+    // Init
+    function ensureLeaguesInit(){ if (!leagues || typeof leagues!=='object' || !leagues.leagues) leagues={leagues:{}}; }
+    ensureLeaguesInit();
+    if (!Object.keys(leagues.leagues).length){ createLeague('Global League'); }
+    if (myTeamName) { const el=document.getElementById('teamName'); if (el) el.value=myTeamName; }
+    function initAdmin(){ const b=document.getElementById('adminBtn'); if (b) b.textContent = adminEnabled ? '✅ Admin ON' : '🔒 Admin mode'; }
+    initAdmin();
+    updateBudget();
+    // Start on Home, other sections hidden until menu click
     switchView('home');
-
-    // Persist my team name in field if present
-    if (myTeamName) $teamName.value = myTeamName;
   </script>
 </body>
 </html>
